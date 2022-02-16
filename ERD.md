@@ -13,51 +13,52 @@
 - an event is CREATED when a contract is SIGNED
 - a team member is ASSOCIATED to an event when the event is CREATED
  ES
+
 ## UML
 
 ### customer
 
-- id
-- first_name
-- last_name
-- email
-- phone
-- mobile
-- company_name
-- date_created
-- date_updated
-- sales_contact
+- id (primary key / int)
+- first_name (varchar(25))
+- last_name (varchar(25))
+- email (varchar(100))
+- phone (varchar(20))
+- mobile (varchar(20))
+- company_name (varchar(250))
+- date_created (DateTime)
+- date_updated (DateTime)
+- sales_contact (ForeignKey(team) / int)
 
 ### contract
 
-- id
-- sales_contact
-- customer
-- date_created
-- date_updated
-- status
-- amount
-- payment_due
+- id (primary key / int)
+- sales_contact (ForeignKey(team) / int)
+- customer (ForeignKey(customer) / int)
+- date_created (DateTime)
+- date_updated (DateTime)
+- status (boolean)
+- amount (Float)
+- payment_due (DateTime)
 
 ### event
 
-- id
-- customer
-- date_created
-- date_updated
-- support_contact
-- event_status
-- attendees
-- event_date
-- notes
+- id (primary key / int)
+- customer (ForeignKey(customer) / int)
+- date_created (DateTime)
+- date_updated (DateTime)
+- support_contact (ForeignKey(team) / int)
+- event_status (ForeignKey(event) / int)
+- attendees (int)
+- event_date (DateTime)
+- notes (varchar(1000))
 
 # team
 
-- id
-- first_name
-- last_name
-- email
-- password
+- id (primary key / int)
+- first_name (varchar(25))
+- last_name (varchar(25))
+- email (varchar(100))
+- password (varchar(100))
 - role
     * sales = read_only(customers, contracts, events)
         * CRU on customers and contracts
