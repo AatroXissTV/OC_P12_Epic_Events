@@ -18,44 +18,55 @@
 
 ### customer
 
-- id (primary key / int)
-- first_name (varchar(25))
-- last_name (varchar(25))
-- email (varchar(100))
-- phone (varchar(20))
-- mobile (varchar(20))
-- company_name (varchar(250))
-- date_created (DateTime)
-- date_updated (DateTime)
-- sales_contact (ForeignKey(team) / int)
+- id: (primary key - autoincrement)
+- first_name: (CharField(max_length=25))
+- last_name: (CharField(max_length=25))
+- email: (EmailField(max_length=254))
+- phone: (CharField(max_length=20))
+- mobile: (CharField(max_length=20))
+- company_name: (CharField(max_length=100))
+- date_created: (DateTimeField(auto_now_add=True))
+- date_updated: (DateTimeField(auto_now=True))
+
+FK: Team -> sales_contact_id
+- sales_contact: (ForeignKey(team) / int)
+
 
 ### contract
 
-- id (primary key / int)
-- sales_contact (ForeignKey(team) / int)
-- customer (ForeignKey(customer) / int)
-- date_created (DateTime)
-- date_updated (DateTime)
-- status (boolean)
-- amount (Float)
-- payment_due (DateTime)
+- id: (primary key - autoincrement)
+- project_name: (CharField(max_length=100))
+- signed: (BooleanField(default=False))
+- amount: (DecimalField(max_digits=10, decimal_places=2))
+- payment_due_date: (DateField())
+- date_created: (DateTimeField(auto_now_add=True))
+- date_updated: (DateTimeField(auto_now=True))
+
+FK customer -> customer_id
+- customer: (ForeignKey(customer) / int)
+- sales_contact: (ForeignKey(team) / int)
+
 
 ### event
 
-- id (primary key / int)
-- customer (ForeignKey(customer) / int)
-- date_created (DateTime)
-- date_updated (DateTime)
-- support_contact (ForeignKey(team) / int)
-- event_status (ForeignKey(event) / int)
-- attendees (int)
-- event_date (DateTime)
-- notes (varchar(1000))
+- id (primary key - autoincrement)
+- event_name: (CharField(max_length=100))
+- event_date: (DateField())
+- attendees: (IntegerField())
+- notes: (TextField())  
+- date_created: (DateTimeField(auto_now_add=True))
+- date_updated: (DateTimeField(auto_now=True))
+
+FK customer -> customer_id
+- customer: (ForeignKey(customer) / int)
+- support_contact: (ForeignKey(team) / int)
+- event_status: (ForeignKey(event) / int)
 
 # team
 
 - id (primary key / int)
-- first_name (varchar(25))
+- username (CharField(max_length=50))
+- first_name (CharField(max_length=25))
 - last_name (varchar(25))
 - email (varchar(100))
 - password (varchar(100))
