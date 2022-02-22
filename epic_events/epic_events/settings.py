@@ -16,7 +16,13 @@ from pathlib import Path
 # third party imports
 
 # local imports
-from secret import DJANGO_SECRET_KEY, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT
+from utils.secret import (
+    DJANGO_SECRET_KEY,
+    DB_USER,
+    DB_PASSWORD,
+    DB_HOST,
+    DB_PORT
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -43,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'app_crm',
 ]
 
 MIDDLEWARE = [
@@ -81,7 +88,7 @@ WSGI_APPLICATION = 'epic_events.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'epic_events_db',
         'USER': DB_USER,
         'PASSWORD': DB_PASSWORD,

@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class EpicEventsDbConfig(AppConfig):
+class AppCrmConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'epic_events_db'
+    name = 'app_crm'
