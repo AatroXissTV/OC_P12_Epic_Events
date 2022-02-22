@@ -3,3 +3,12 @@
 
 # visual studio code
 .vscode/
+
+# pycache
+__pycache__/
+
+# migrations
+migrations/
+
+# Secret Variables 
+secret.py
