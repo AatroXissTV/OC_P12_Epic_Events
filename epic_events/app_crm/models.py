@@ -12,7 +12,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2020, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = "MIT"
-__version__ = "0.0.4"
+__version__ = "0.0.5"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -85,7 +85,29 @@ class Contract(models.Model):
 
     # Foreign keys
     customer_id = models.ForeignKey(Customer, on_delete=models.PROTECT)
+    # To Do: add the other foreign keys for the users
 
 
 class Event(models.Model):
-    pass
+    """
+    This class represents an event in the CRM.
+
+    Attributes:
+    :arg event_name: The name of the event
+    :arg event_date: The date of the event
+    :arg attendees: number of attendees to the event
+    :arg notes: random notes about the event
+    """
+
+    event_id = models.AutoField(primary_key=True)
+
+    event_name = models.CharField(max_length=100)
+    event_date = models.DateField()
+    attendees = models.IntegerField()
+    notes = models.TextField()
+
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    # Foreign keys
+    contract_id = models.ForeignKey(Contract, on_delete=models.PROTECT)
