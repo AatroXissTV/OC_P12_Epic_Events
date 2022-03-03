@@ -10,6 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+# standard library
+import os
+
 # third-party imports
 
 # Django imports
@@ -18,6 +21,7 @@ from pathlib import Path
 # local imports
 from secret import (
     DJANGO_SECRET_KEY,
+    NAME_DB,
     USERNAME_DB,
     PASSWORD_DB,
     HOST_DB,
@@ -91,7 +95,7 @@ WSGI_APPLICATION = 'epic_events.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'epic_events_db',
+        'NAME': NAME_DB, 
         'USER': USERNAME_DB,
         'PASSWORD': PASSWORD_DB,
         'HOST': HOST_DB,
