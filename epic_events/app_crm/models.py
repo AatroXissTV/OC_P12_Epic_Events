@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.0.2"
+__version__ = "0.0.5"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -63,3 +63,29 @@ class Customer(models.Model):
         return f"{self.first_name} {self.last_name}"
 
     # Meta
+
+
+class Contract(models.Model):
+    """
+    This class represents a contract in the crm.
+
+    Attributes:
+        amount (int): The contract's amount.
+        payment_due_date (date): The contract's payment due date.
+        is_signed (bool): Whether the contract is signed or not.
+                            True if the contract is signed,
+                            False otherwise.
+    """
+
+    # Fields
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_due_date = models.DateTimeField()
+    is_signed = models.BooleanField(default=False)
+
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    # FKs
+    # add customer_id FK
+
+    # Methods
