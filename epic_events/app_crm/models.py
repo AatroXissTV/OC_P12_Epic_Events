@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.0.7"
+__version__ = "0.0.8"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -91,3 +91,33 @@ class Contract(models.Model):
     # add support_contact_id FK
 
     # Methods
+
+    # Meta
+
+
+class Event(models.Model):
+    """
+    This class represents an event in the crm.
+
+    Attributes:
+        event_name (str): The event's name.
+        event_date (date): The event's date.
+        attendees (int): The number of attendees.
+        notes (str): The event's notes.
+    """
+
+    # Fields
+    event_name = models.CharField(max_length=100)
+    event_date = models.DateTimeField()
+    attendees = models.IntegerField()
+    notes = models.TextField()
+
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    # FKs
+    # add contract_id FK
+
+    # Methods
+
+    # Meta
