@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.0.12"
+__version__ = "0.0.13"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -63,4 +63,15 @@ class ContractSerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
-    pass
+    """
+    This class is the serializer that helps translating Event objects
+    into JSON.
+
+    Serialize every field of the Event model.
+    Define id, date_created and date_updated fields as read-only.
+    """
+
+    class Meta:
+        model = Event
+        fields = '__all__'
+        read_only_fields = ('id', 'date_created', 'date_updated')
