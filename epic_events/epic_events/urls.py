@@ -22,7 +22,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.0.17"
+__version__ = "0.0.18"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -30,7 +30,7 @@ __status__ = "Development"
 # standard library imports
 
 # third party imports
-from rest_framework import routers
+from rest_framework_nested import routers
 
 # django imports
 from django.contrib import admin
@@ -52,7 +52,7 @@ customer_router = routers.NestedSimpleRouter(
 customer_router.register(
     'contract',
     views.ContractViewSet,
-    base_name='customer-contract'
+    basename='customer-contract'
 )
 contract_router = routers.NestedSimpleRouter(
     customer_router,
@@ -62,7 +62,7 @@ contract_router = routers.NestedSimpleRouter(
 contract_router.register(
     'event',
     views.EventViewSet,
-    base_name='contract-event'
+    basename='contract-event'
 )
 
 urlpatterns = [
