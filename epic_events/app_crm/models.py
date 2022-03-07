@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.0.7"
+__version__ = "0.0.9"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -23,6 +23,7 @@ __status__ = "Development"
 from django.db import models
 
 # local application imports
+from app_users.models import User
 
 # other imports & constants
 
@@ -56,7 +57,12 @@ class Customer(models.Model):
     date_updated = models.DateTimeField(auto_now=True)
 
     # FKs
-    # add sales_contact_id FK
+    sales_contact_id = models.ForeignKey(
+        User,
+        on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True,
+    )
 
     # Methods
     def __str__(self):
@@ -87,7 +93,48 @@ class Contract(models.Model):
     date_updated = models.DateTimeField(auto_now=True)
 
     # FKs
-    # add customer_id FK
-    # add support_contact_id FK
+    customer = models.ForeignKey(
+        Customer,
+        on_delete=models.CASCADE,
+        related_name='contract',
+    )
+    support_contact_id = models.ForeignKey(
+        User,
+        on_delete=models.DO_NOTHING,
+    )
 
     # Methods
+
+    # Meta
+
+
+class Event(models.Model):
+    """
+    This class represents an event in the crm.
+
+    Attributes:
+        event_name (str): The event's name.
+        event_date (date): The event's date.
+        attendees (int): The number of attendees.
+        notes (str): The event's notes.
+    """
+
+    # Fields
+    event_name = models.CharField(max_length=100)
+    event_date = models.DateTimeField()
+    attendees = models.IntegerField()
+    notes = models.TextField()
+
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    # FKs
+    contract_id = models.ForeignKey(
+        Contract,
+        on_delete=models.CASCADE,
+        related_name='event',
+    )
+
+    # Methods
+
+    # Meta
