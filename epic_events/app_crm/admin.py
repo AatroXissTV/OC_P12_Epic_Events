@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.0.21"
+__version__ = "0.0.22"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -58,10 +58,6 @@ class CustomerAdmin(admin.ModelAdmin):
     search_fields = ('first_name', 'last_name', 'company_name',
                      'sales_contact_id')
 
-    @staticmethod
-    def full_name(obj):
-        return f"{obj.first_name} {obj.last_name}"
-
 
 @admin.register(Contract)
 class ContractAdmin(admin.ModelAdmin):
@@ -90,4 +86,23 @@ class ContractAdmin(admin.ModelAdmin):
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    pass
+    fieldsets = (
+        (
+            "Event informations",
+            {"fields": ("event_name", "event_date", "attendees",
+                        "notes")}
+        )
+        (
+            "Contract informations",
+            {"fields": ("contract_id",)}
+        )
+        (
+            "Date informations",
+            {"fields": ("date_created", "date_updated")}
+        )
+    )
+    read_only_fields = ('date_created', 'date_updated', 'contract_id')
+    list_display = ('event_name', 'event_date', 'attendees',
+                    'notes', 'contract_id', 'support_contact_name')
+    list_filter = ('contract_id', 'support_contact_name')
+    search_fields = ('event_name')
