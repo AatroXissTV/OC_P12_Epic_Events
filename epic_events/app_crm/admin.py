@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.0.22"
+__version__ = "0.0.23"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -40,11 +40,11 @@ class CustomerAdmin(admin.ModelAdmin):
             {"fields": ("first_name", "last_name", "email",
                         "phone_number", "mobile", "company_name",
                         "is_customer")}
-        )
+        ),
         (
             "Sales contact informations",
             {"fields": ("sales_contact_id",)}
-        )
+        ),
         (
             "Date informations",
             {"fields": ("date_created", "date_updated")}
@@ -54,7 +54,7 @@ class CustomerAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name', 'email',
                     'phone_number', 'mobile', 'company_name',
                     'is_customer',)
-    list_filter = ('is_customer', 'sale_contact_id',)
+    list_filter = ('is_customer', 'sales_contact_id',)
     search_fields = ('first_name', 'last_name', 'company_name',
                      'sales_contact_id')
 
@@ -66,11 +66,11 @@ class ContractAdmin(admin.ModelAdmin):
             "Contract informations",
             {"fields": ("project_name", "amount", "payment_due_date",
                         "is_signed", "customer_id")}
-        )
+        ),
         (
             "Support contact informations",
             {"fields": ("support_contact_id",)}
-        )
+        ),
         (
             "Date informations",
             {"fields": ("date_created", "date_updated")}
@@ -91,18 +91,18 @@ class EventAdmin(admin.ModelAdmin):
             "Event informations",
             {"fields": ("event_name", "event_date", "attendees",
                         "notes")}
-        )
+        ),
         (
             "Contract informations",
             {"fields": ("contract_id",)}
-        )
+        ),
         (
             "Date informations",
             {"fields": ("date_created", "date_updated")}
-        )
+        ),
     )
     read_only_fields = ('date_created', 'date_updated', 'contract_id')
     list_display = ('event_name', 'event_date', 'attendees',
-                    'notes', 'contract_id', 'support_contact_name')
-    list_filter = ('contract_id', 'support_contact_name')
-    search_fields = ('event_name')
+                    'notes', 'contract_id')
+    list_filter = ('contract_id', 'event_name')
+    search_fields = ('event_name', 'contract_id')
