@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.0.20"
+__version__ = "0.0.21"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -65,7 +65,27 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(Contract)
 class ContractAdmin(admin.ModelAdmin):
-    pass
+    fieldsets = (
+        (
+            "Contract informations",
+            {"fields": ("project_name", "amount", "payment_due_date",
+                        "is_signed", "customer_id")}
+        )
+        (
+            "Support contact informations",
+            {"fields": ("support_contact_id",)}
+        )
+        (
+            "Date informations",
+            {"fields": ("date_created", "date_updated")}
+        )
+    )
+    read_only_fields = ('date_created', 'date_updated', 'support_contact_id')
+    list_display = ('project_name', 'amount', 'payment_due_date',
+                    'is_signed', 'customer_id', 'support_contact_id')
+    list_filter = ('is_signed', 'customer_id', 'support_contact_id')
+    search_fields = ('project_name', 'customer__last_name',
+                     'support_contact_id')
 
 
 @admin.register(Event)
