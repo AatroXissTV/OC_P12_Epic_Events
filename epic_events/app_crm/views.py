@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -18,8 +18,9 @@ __status__ = "Development"
 # standard library imports
 
 # third party imports
-from rest_framework import viewsets, status
-from rest_framework.response import Response
+from rest_framework import generics, viewsets
+from rest_framework.filters import SearchFilter
+from rest_framework.permissions import IsAuthenticated
 
 # django imports
 
@@ -38,56 +39,58 @@ from .serializers import (
 # other imports & constants
 
 
-class CustomerViewSet(viewsets.ModelViewSet):
-    # API endpoint that allows customer to be created or viewed.
-    queryset = Customer.objects.all()
+class CustomerViewSet(generics.ListCreateAPIView):
     serializer_class = CustomerSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter]
+    search_fields = ['^first_name', '^last_name', '^email']
 
-    def create(self, request):
-        data = request.data.copy()
-        data['sales_contact_id'] = request.user.id
-        data['is_customer'] = True
-
-        serialized_data = CustomerSerializer(data=data)
-        if serialized_data.is_valid():
-            serialized_data.save()
-            return Response(serialized_data.data,
-                            status=status.HTTP_201_CREATED)
-        return Response(serialized_data.errors,
-                        status=status.HTTP_400_BAD_REQUEST)
+    def get_queryset(self):
+        if self.request.user.role == 'sales':
+            prospects = Customer.objects.filter(is_customer=False)
+            own_customers = Customer.objects.filter(
+                is_customer=True,
+                sales_contact_id=self.request.user
+            )
+            customers = Customer.objects.all()
+            return prospects | own_customers | customers
+        elif self.request.user.role == 'support':
+            return Customer.objects.filter(is_customer=True)
+        else:
+            return Customer.objects.all()
 
 
 class ContractViewSet(viewsets.ModelViewSet):
-    # API endpoint that allows contract to be created or viewed.
-    queryset = Contract.objects.all()
     serializer_class = ContractSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter]
+    search_fields = ['^customer__first_name', '^customer__last_name',
+                     '^customer__email', '=date_created', '=amount']
 
-    def create(self, request, client_pk=None):
-        data = request.data.copy()
-        data['customer'] = client_pk
-
-        serialized_data = ContractSerializer(data=data)
-        if serialized_data.is_valid():
-            serialized_data.save()
-            return Response(serialized_data.data,
-                            status=status.HTTP_201_CREATED)
-        return Response(serialized_data.errors,
-                        status=status.HTTP_400_BAD_REQUEST)
+    def get_queryset(self):
+        if self.request.user.role == 'sales':
+            return Contract.objects.filter(
+                customer__sales_contact_id=self.request.user)
+        elif self.request.user.role == 'support':
+            return Contract.objects.filter(
+                support_contact_id=self.request.user)
+        else:
+            return Contract.objects.all()
 
 
 class EventViewSet(viewsets.ModelViewSet):
-    # API endpoint that allows event to be created or viewed.
-    queryset = Event.objects.all()
     serializer_class = EventSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter]
+    search_fields = ['^customer__first_name', '^customer__last_name',
+                     '^customer__email', '=date_created']
 
-    def create(self, request, contract_pk=None):
-        data = request.data.copy()
-        data['contract_id'] = contract_pk
-
-        serialized_data = EventSerializer(data=data)
-        if serialized_data.is_valid():
-            serialized_data.save()
-            return Response(serialized_data.data,
-                            status=status.HTTP_201_CREATED)
-        return Response(serialized_data.errors,
-                        status=status.HTTP_400_BAD_REQUEST)
+    def get_queryset(self):
+        if self.request.user.role == 'sales':
+            return Event.objects.filter(
+                contract_id__customer__sales_contact_id=self.request.user)
+        elif self.request.user.role == 'support':
+            return Event.objects.filter(
+                contract_id__support_contact_id=self.request.user)
+        else:
+            return Event.objects.all()
