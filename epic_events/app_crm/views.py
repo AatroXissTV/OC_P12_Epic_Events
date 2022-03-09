@@ -1,6 +1,6 @@
 # app_crm/views.py
 # created 07/03/2022 at 09:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 07/03/2022 at 09:22 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 10/03/2022 at 10:22 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/views.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -18,7 +18,7 @@ __status__ = "Development"
 # standard library imports
 
 # third party imports
-from rest_framework import generics, viewsets
+from rest_framework import generics
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 
@@ -39,7 +39,7 @@ from .serializers import (
 # other imports & constants
 
 
-class CustomerViewSet(generics.ListCreateAPIView):
+class CustomerList(generics.ListCreateAPIView):
     serializer_class = CustomerSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter]
@@ -60,7 +60,7 @@ class CustomerViewSet(generics.ListCreateAPIView):
             return Customer.objects.all()
 
 
-class ContractViewSet(viewsets.ModelViewSet):
+class ContractList(generics.ListCreateAPIView):
     serializer_class = ContractSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter]
@@ -78,7 +78,7 @@ class ContractViewSet(viewsets.ModelViewSet):
             return Contract.objects.all()
 
 
-class EventViewSet(viewsets.ModelViewSet):
+class EventList(generics.ListCreateAPIView):
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter]
