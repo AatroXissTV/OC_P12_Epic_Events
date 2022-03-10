@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -18,9 +18,10 @@ __status__ = "Development"
 # standard library imports
 
 # third party imports
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 # django imports
 
@@ -58,6 +59,15 @@ class CustomerList(generics.ListCreateAPIView):
             return Customer.objects.filter(is_customer=True)
         else:
             return Customer.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        data = request.data.copy()
+        serializer = CustomerSerializer(data=data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ContractList(generics.ListCreateAPIView):
