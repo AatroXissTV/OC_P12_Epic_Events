@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -62,6 +62,7 @@ class CustomerList(generics.ListCreateAPIView):
 
     def post(self, request, *args, **kwargs):
         data = request.data.copy()
+        data['sales_contact_id'] = self.request.user.id
         serializer = CustomerSerializer(data=data)
 
         if serializer.is_valid():
@@ -86,6 +87,14 @@ class ContractList(generics.ListCreateAPIView):
                 support_contact_id=self.request.user)
         else:
             return Contract.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        data = request.data.copy()
+        serializer = ContractSerializer(data=data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class EventList(generics.ListCreateAPIView):
