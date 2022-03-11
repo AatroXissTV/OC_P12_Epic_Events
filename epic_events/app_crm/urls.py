@@ -30,6 +30,9 @@ from . import views
 
 urlpatterns = [
     path('customer/', views.CustomerList.as_view(), name='customer-list'),
+    path('customer/<int:pk>/',
+         views.CustomerDetail.as_view(),
+         name='customer-detail'),
     path('contracts/', views.ContractList.as_view(), name='contract-list'),
     path('events/', views.EventList.as_view(), name='event-list'),
 ]
