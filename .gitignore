@@ -12,3 +12,6 @@ migrations/
 
 # Secret Variables 
 secret.py
+
+# gitignore logs
+errors.log
