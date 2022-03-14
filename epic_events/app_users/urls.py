@@ -1,6 +1,6 @@
 # app_users/urls.py
 # created 09/03/2022 at 09:58 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 09/03/2022 at 10:22 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 14/03/2022 at 09:39 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_users/urls.py:
     - *
@@ -21,7 +21,10 @@ __status__ = "Development"
 
 # django imports
 from django.urls import path
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView
+)
 
 # local application imports
 
@@ -30,4 +33,5 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 urlpatterns = [
     path('login/', TokenObtainPairView.as_view(), name='login'),
+    path('login/refresh/', TokenRefreshView.as_view(), name='refresh'),
 ]
