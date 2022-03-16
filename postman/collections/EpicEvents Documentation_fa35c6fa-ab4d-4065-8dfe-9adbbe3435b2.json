@@ -1,0 +1,352 @@
+{
+    "info": {
+        "_postman_id": "052df2cc-576c-4dda-bb24-b1c3c2c6199e",
+        "name": "EpicEvents Documentation",
+        "description": "This is a RESTful API designed for an event management company.\n\nThe app allows users to create and update:\n\n*   customer database\n*   contract database linked to customers\n*   event database linked to a specific contract\n    \n\nThe access rights of the API are determined by the 'role' of their users.\n\nThe database is implemented with Django ORM and PostgreSQL\n\n# Administration\n\nThe Django administration site is accessible via [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/).\n\nThis access is possible for all users of the management team.\n\nThey can create / modify / delete all objects related to users, customers, contracts and events.\n\nNote that managers can also access all CRM endpoints and have the same permissions to interact with all customers, contracts and events, within the limits of the allowed HTTP methods.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "AUTHENTICATION",
+            "item": [
+                {
+                    "name": "login",
+                    "id": "cd4605d4-fdb1-424f-b30b-9a9d3b41d588",
+                    "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                    },
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "username",
+                                    "value": "{{username}}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "password",
+                                    "value": "{{password}}",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "http://127.0.0.1:8000/login/",
+                            "protocol": "http",
+                            "host": [
+                                "127",
+                                "0",
+                                "0",
+                                "1"
+                            ],
+                            "port": "8000",
+                            "path": [
+                                "login",
+                                ""
+                            ]
+                        },
+                        "description": "This endpoint needs a created user by the management team to work.  \nThe management team has to **create a user in Django Admin**.\n\nA user can send a **POST** request to this endpoint. If the data entered is validated by the API then it **returns a JWT Token**.  \nThis token will allow you to access all the endpoints of the API. **It has a lifetime of 30 days**.  \nAfter that period, you will have to refresh it."
+                    },
+                    "response": []
+                }
+            ],
+            "id": "e1b54bca-870e-4bea-8e52-9511745be173",
+            "description": "JWT (JSON Web Token) authentication is used.\n\nUsers are divided into three roles that determine authorized access to the various points of the API:\n\n*   management\n*   sales\n*   support\n    \n\n  \nThe user's role is determined by a Manager via Django admin at the time of creation, and can be modified afterwards."
+        },
+        {
+            "name": "CRM",
+            "item": [
+                {
+                    "name": "Customers",
+                    "item": [
+                        {
+                            "name": "customer_list",
+                            "id": "29175a45-c44f-4609-857f-4822f6eec9fe",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/customer/",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "customer",
+                                        ""
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "customer_detail",
+                            "id": "07d28913-bbb1-415d-b88c-a7388648ffa8",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/customer/1",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "customer",
+                                        "1"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "customer_detail",
+                            "id": "2b3ed2e2-e55c-4448-abb4-d5311e894db4",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "PUT",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": []
+                                },
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/customer/1",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "customer",
+                                        "1"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "customer_detail",
+                            "id": "00a6f426-79a9-44c2-970a-ffab96eaa9f8",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "DELETE",
+                                "header": [],
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/customer/1",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "customer",
+                                        "1"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        }
+                    ],
+                    "id": "04a5212d-748e-45d4-b672-bdb92d4c18c8"
+                },
+                {
+                    "name": "Contracts",
+                    "item": [
+                        {
+                            "name": "contract_list",
+                            "id": "f9c05e70-997c-4165-baf8-8c19b872d234",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/contracts/",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "contracts",
+                                        ""
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "contract_detail",
+                            "id": "825dd76a-1d18-4732-8eb2-0f65476df659",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/contracts/1",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "contracts",
+                                        "1"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        }
+                    ],
+                    "id": "c4d313e5-b43c-4445-bce9-f8a850ac5ae1"
+                },
+                {
+                    "name": "Events",
+                    "item": [
+                        {
+                            "name": "event_list",
+                            "id": "c196fac6-585b-48aa-a1cf-8554e0fe4cc1",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/events/",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "events",
+                                        ""
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "event_detail",
+                            "id": "c378d312-8c0e-4db5-a94c-251fbf66ecac",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/events/1",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "events",
+                                        "1"
+                                    ]
+                                }
+                            },
+                            "response": []
+                        }
+                    ],
+                    "id": "e5c86c5a-da3f-4f3b-85ee-388957b8035a"
+                }
+            ],
+            "id": "df10d1ca-6a38-49e8-9628-96659d58b483"
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "id": "cff8ef4e-f6b8-441b-ab01-278666717fa5",
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "id": "11f36025-37a0-4611-a345-243511e240ce",
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "id": "79d86216-ce39-4ec1-80e3-f66746c412cb",
+            "key": "baseUrl",
+            "value": "{{baseUrl}}",
+            "type": "string"
+        }
+    ]
+}
