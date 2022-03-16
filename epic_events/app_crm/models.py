@@ -1,6 +1,6 @@
 # app_crm/models.py
 # created 02/03/2022 at 12:06 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 02/03/2022 at 12:06 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 15/03/2022 at 16:11 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/models.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.0"
+__version__ = "0.1.9"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -101,9 +101,13 @@ class Contract(models.Model):
     support_contact_id = models.ForeignKey(
         User,
         on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True,
     )
 
     # Methods
+    def __str__(self):
+        return f"{self.project_name} ({self.is_signed})"
 
     # Meta
 
@@ -136,5 +140,7 @@ class Event(models.Model):
     )
 
     # Methods
+    def __str__(self):
+        return f"{self.event_name} ({self.contract_id})"
 
     # Meta

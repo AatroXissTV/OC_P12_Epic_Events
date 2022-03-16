@@ -1,6 +1,6 @@
 # app_crm/admin.py
 # created 08/03/2022 at 09:07 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 08/03/2022 at 09:07 by Antoine 'AatroXiss' BEAUDESSONx
+# last modified 15/03/2022 at 16:11 by Antoine 'AatroXiss' BEAUDESSONx
 
 """ app_crm/admin.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.0"
+__version__ = "0.1.9"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -75,7 +75,7 @@ class ContractAdmin(admin.ModelAdmin):
         ("Date informations",
          {'fields': ('date_created', 'date_updated')}),
     )
-    readonly_fields = ('date_created', 'date_updated', 'support_contact_id')
+    readonly_fields = ('date_created', 'date_updated')
     list_display = ('contract_number', 'support_contact_id',
                     'support_contact_name', 'customer',
                     'amount', 'payment_due_date', 'is_signed')
@@ -84,14 +84,17 @@ class ContractAdmin(admin.ModelAdmin):
 
     @staticmethod
     def contract_number(obj):
-        return f"Contratct #{obj.id}"
+        return f"Contract #{obj.id}"
 
     @staticmethod
     def support_contact_name(obj):
-        first_name = obj.support_contact_id.first_name
-        last_name = obj.support_contact_id.last_name.upper()
-        contact_id = obj.support_contact_id.id
-        return f"{first_name} {last_name} (id:{contact_id})"
+        if obj.support_contact_id is None:
+            return "No support contact"
+        else:
+            first_name = obj.support_contact_id.first_name
+            last_name = obj.support_contact_id.last_name.upper()
+            contact_id = obj.support_contact_id.id
+            return f"{first_name} {last_name} (id:{contact_id})"
 
 
 @admin.register(Event)
@@ -106,7 +109,7 @@ class EventAdmin(admin.ModelAdmin):
         ("Date informations",
             {'fields': ('date_created', 'date_updated')}),
     )
-    readonly_fields = ('date_created', 'date_updated', 'contract_id')
+    readonly_fields = ('date_created', 'date_updated')
     list_display = ('event_name', 'event_date',
                     'contract_id', 'support_contact_id',
                     'attendees', 'notes')
@@ -115,8 +118,11 @@ class EventAdmin(admin.ModelAdmin):
 
     @staticmethod
     def support_contact_id(obj):
-        return obj.contract_id.support_contact_id.id
+        if obj.contract_id.support_contact_id.id is not None:
+            return obj.contract_id.support_contact_id.id
+        else:
+            return "No support contact"
 
     @staticmethod
     def customer_last_name(obj):
-        return obj.contract_id.customer.last_name
+        return obj.contract.customer.last_name
