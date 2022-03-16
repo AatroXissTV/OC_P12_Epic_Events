@@ -1,6 +1,6 @@
 # epic_events/urls.py
 # created 07/03/2022 at 15:47 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 09/03/2022 at 10:22 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 16/03/2022 at 15:37 by Antoine 'AatroXiss' BEAUDESSON
 
 """epic_events URL Configuration
 
@@ -22,7 +22,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.2"
+__version__ = "0.1.11"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -34,6 +34,7 @@ __status__ = "Development"
 # django imports
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework.schemas import get_schema_view
 
 # local application imports
 
@@ -43,4 +44,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('crm/', include('app_crm.urls')),
     path('', include('app_users.urls')),
+    path('openapi/', get_schema_view(
+        title="Epic_Events API",
+        description="Epic_Events API",
+        version="1.0.0"
+        ), name='openapi-schema'),
 ]
