@@ -63,120 +63,252 @@
                     "name": "Customers",
                     "item": [
                         {
-                            "name": "customer_list",
-                            "id": "29175a45-c44f-4609-857f-4822f6eec9fe",
-                            "protocolProfileBehavior": {
-                                "disableBodyPruning": true
-                            },
-                            "request": {
-                                "method": "GET",
-                                "header": [],
-                                "url": {
-                                    "raw": "http://127.0.0.1:8000/crm/customer/",
-                                    "protocol": "http",
-                                    "host": [
-                                        "127",
-                                        "0",
-                                        "0",
-                                        "1"
-                                    ],
-                                    "port": "8000",
-                                    "path": [
-                                        "crm",
-                                        "customer",
-                                        ""
-                                    ]
-                                }
-                            },
-                            "response": []
-                        },
-                        {
-                            "name": "customer_detail",
-                            "id": "07d28913-bbb1-415d-b88c-a7388648ffa8",
-                            "protocolProfileBehavior": {
-                                "disableBodyPruning": true
-                            },
-                            "request": {
-                                "method": "GET",
-                                "header": [],
-                                "url": {
-                                    "raw": "http://127.0.0.1:8000/crm/customer/1",
-                                    "protocol": "http",
-                                    "host": [
-                                        "127",
-                                        "0",
-                                        "0",
-                                        "1"
-                                    ],
-                                    "port": "8000",
-                                    "path": [
-                                        "crm",
-                                        "customer",
-                                        "1"
-                                    ]
-                                }
-                            },
-                            "response": []
-                        },
-                        {
-                            "name": "customer_detail",
-                            "id": "2b3ed2e2-e55c-4448-abb4-d5311e894db4",
-                            "protocolProfileBehavior": {
-                                "disableBodyPruning": true
-                            },
-                            "request": {
-                                "method": "PUT",
-                                "header": [],
-                                "body": {
-                                    "mode": "formdata",
-                                    "formdata": []
+                            "name": "Customers",
+                            "item": [
+                                {
+                                    "name": "create_customer",
+                                    "id": "72232c3e-886f-40ce-a118-8000c448fdd3",
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    },
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [],
+                                        "body": {
+                                            "mode": "formdata",
+                                            "formdata": [
+                                                {
+                                                    "key": "first_name",
+                                                    "value": "{{customer_test_first_name}}",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "last_name",
+                                                    "value": "{{customer_test_last_name}}",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "email",
+                                                    "value": "{{customer_test_email}}",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "phone_number",
+                                                    "value": "{{customer_test_phone_number}}",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "mobile",
+                                                    "value": "{{customer_test_mobile}}",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "company_name",
+                                                    "value": "{{customer_test_company}}",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "is_customer",
+                                                    "value": "{{customer_test_is_customer}}",
+                                                    "type": "text"
+                                                }
+                                            ]
+                                        },
+                                        "url": {
+                                            "raw": "http://127.0.0.1:8000/crm/customers/",
+                                            "protocol": "http",
+                                            "host": [
+                                                "127",
+                                                "0",
+                                                "0",
+                                                "1"
+                                            ],
+                                            "port": "8000",
+                                            "path": [
+                                                "crm",
+                                                "customers",
+                                                ""
+                                            ]
+                                        },
+                                        "description": "A user from the management or sales team can create a prospect or a customer.\n\nIf the customer created has the field \"is_customer\" set to true, the user that created the new customer is automatically set as the sales contact.\n\nIf the field \"is_customer\" is set to False, the \"sales_contact_id\" is set to null."
+                                    },
+                                    "response": []
                                 },
-                                "url": {
-                                    "raw": "http://127.0.0.1:8000/crm/customer/1",
-                                    "protocol": "http",
-                                    "host": [
-                                        "127",
-                                        "0",
-                                        "0",
-                                        "1"
-                                    ],
-                                    "port": "8000",
-                                    "path": [
-                                        "crm",
-                                        "customer",
-                                        "1"
-                                    ]
+                                {
+                                    "name": "get_customers",
+                                    "id": "29175a45-c44f-4609-857f-4822f6eec9fe",
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    },
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [],
+                                        "body": {
+                                            "mode": "formdata",
+                                            "formdata": []
+                                        },
+                                        "url": {
+                                            "raw": "http://127.0.0.1:8000/crm/customers/",
+                                            "protocol": "http",
+                                            "host": [
+                                                "127",
+                                                "0",
+                                                "0",
+                                                "1"
+                                            ],
+                                            "port": "8000",
+                                            "path": [
+                                                "crm",
+                                                "customers",
+                                                ""
+                                            ]
+                                        },
+                                        "description": "The user can see the list of all customers. The customers in the returned list depends on the role of the user.\n\n# Content\n\n*   If the user has the role \"management\" he can see every customers in the DB.\n*   if the user has the role \"sales\" he can see every prospects + customers that are related to him.\n*   if the user has the role \"support\", he can see every customers that are related to him."
+                                    },
+                                    "response": []
                                 }
-                            },
-                            "response": []
+                            ],
+                            "id": "60eb3cb0-5e73-4494-bdb8-8b86a08f2ab2"
                         },
                         {
-                            "name": "customer_detail",
-                            "id": "00a6f426-79a9-44c2-970a-ffab96eaa9f8",
-                            "protocolProfileBehavior": {
-                                "disableBodyPruning": true
-                            },
-                            "request": {
-                                "method": "DELETE",
-                                "header": [],
-                                "url": {
-                                    "raw": "http://127.0.0.1:8000/crm/customer/1",
-                                    "protocol": "http",
-                                    "host": [
-                                        "127",
-                                        "0",
-                                        "0",
-                                        "1"
-                                    ],
-                                    "port": "8000",
-                                    "path": [
-                                        "crm",
-                                        "customer",
-                                        "1"
-                                    ]
+                            "name": "Cutomer Details",
+                            "item": [
+                                {
+                                    "name": "get_customer",
+                                    "id": "07d28913-bbb1-415d-b88c-a7388648ffa8",
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    },
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [],
+                                        "url": {
+                                            "raw": "http://127.0.0.1:8000/crm/customers/2/",
+                                            "protocol": "http",
+                                            "host": [
+                                                "127",
+                                                "0",
+                                                "0",
+                                                "1"
+                                            ],
+                                            "port": "8000",
+                                            "path": [
+                                                "crm",
+                                                "customers",
+                                                "2",
+                                                ""
+                                            ]
+                                        },
+                                        "description": "The user can access the customers details depending on his role."
+                                    },
+                                    "response": []
+                                },
+                                {
+                                    "name": "put_customer",
+                                    "id": "2b3ed2e2-e55c-4448-abb4-d5311e894db4",
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    },
+                                    "request": {
+                                        "method": "PUT",
+                                        "header": [],
+                                        "body": {
+                                            "mode": "formdata",
+                                            "formdata": [
+                                                {
+                                                    "key": "first_name",
+                                                    "value": "{{customer_test_first_name}}",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "last_name",
+                                                    "value": "{{customer_test_last_name}}",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "email",
+                                                    "value": "{{customer_test_email}}",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "phone_number",
+                                                    "value": "{{customer_test_phone_number}}",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "mobile",
+                                                    "value": "{{customer_test_mobile}}",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "company_name",
+                                                    "value": "{{customer_test_company}}",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "is_customer",
+                                                    "value": "{{customer_test_is_customer}}",
+                                                    "type": "text",
+                                                    "disabled": true
+                                                }
+                                            ]
+                                        },
+                                        "url": {
+                                            "raw": "http://127.0.0.1:8000/crm/customers/2/",
+                                            "protocol": "http",
+                                            "host": [
+                                                "127",
+                                                "0",
+                                                "0",
+                                                "1"
+                                            ],
+                                            "port": "8000",
+                                            "path": [
+                                                "crm",
+                                                "customers",
+                                                "2",
+                                                ""
+                                            ]
+                                        }
+                                    },
+                                    "response": []
+                                },
+                                {
+                                    "name": "delete_customer",
+                                    "id": "00a6f426-79a9-44c2-970a-ffab96eaa9f8",
+                                    "protocolProfileBehavior": {
+                                        "disableBodyPruning": true
+                                    },
+                                    "request": {
+                                        "method": "DELETE",
+                                        "header": [],
+                                        "body": {
+                                            "mode": "formdata",
+                                            "formdata": []
+                                        },
+                                        "url": {
+                                            "raw": "http://127.0.0.1:8000/crm/customers/13/",
+                                            "protocol": "http",
+                                            "host": [
+                                                "127",
+                                                "0",
+                                                "0",
+                                                "1"
+                                            ],
+                                            "port": "8000",
+                                            "path": [
+                                                "crm",
+                                                "customers",
+                                                "13",
+                                                ""
+                                            ]
+                                        },
+                                        "description": "A user from the 'management' or 'sales' roles can delete a customer from the database."
+                                    },
+                                    "response": []
                                 }
-                            },
-                            "response": []
+                            ],
+                            "id": "05f6e124-f2f8-4664-b319-acf154810e1d"
                         }
                     ],
                     "id": "04a5212d-748e-45d4-b672-bdb92d4c18c8"
@@ -343,7 +475,7 @@
     ],
     "variable": [
         {
-            "id": "c5d06e59-a4e6-42d0-9e8e-d6326a581f10",
+            "id": "ebc8818f-e721-4652-80c7-a914b5b60106",
             "key": "baseUrl",
             "value": "{{baseUrl}}",
             "type": "string"
