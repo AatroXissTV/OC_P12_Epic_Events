@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.13"
+__version__ = "0.1.14"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -130,7 +130,22 @@ class ContractList(generics.ListCreateAPIView):
         serializer = ContractSerializer(data=request.data)
 
         if serializer.is_valid(raise_exception=True):
-            serializer.validated_data['sales_contact_id'] = request.user # noqa
+            if serializer.validated_data['customer'].is_customer is False:
+                return Response(
+                    {'detail': 'You cannot create a contract for a prospect.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            elif serializer.validated_data['is_signed'] is True:
+                if serializer.validated_data['support_contact_id'] is None:
+                    return Response(
+                        {'detail': 'You cannot create a signed contract without a support contact.'},  # noqa
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                elif serializer.validated_data['support_contact_id'].role != 'support':  # noqa
+                    return Response(
+                        {'detail': 'You cannot create a signed contract with a non-support contact.'},  # noqa
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
