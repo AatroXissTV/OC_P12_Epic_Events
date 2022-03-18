@@ -76,37 +76,44 @@
                                     "formdata": [
                                         {
                                             "key": "first_name",
-                                            "value": "{{customer_test_first_name}}",
+                                            "value": "John",
+                                            "description": "string - Required",
                                             "type": "text"
                                         },
                                         {
                                             "key": "last_name",
-                                            "value": "{{customer_test_last_name}}",
+                                            "value": "Doe",
+                                            "description": "string - Required",
                                             "type": "text"
                                         },
                                         {
                                             "key": "email",
-                                            "value": "{{customer_test_email}}",
+                                            "value": "john.doe@gmail.com",
+                                            "description": "string - Required",
                                             "type": "text"
                                         },
                                         {
                                             "key": "phone_number",
-                                            "value": "{{customer_test_phone_number}}",
+                                            "value": "0100000000",
+                                            "description": "string",
                                             "type": "text"
                                         },
                                         {
                                             "key": "mobile",
-                                            "value": "{{customer_test_mobile}}",
+                                            "value": "0600000000",
+                                            "description": "string",
                                             "type": "text"
                                         },
                                         {
                                             "key": "company_name",
-                                            "value": "{{customer_test_company}}",
+                                            "value": "Apple",
+                                            "description": "string",
                                             "type": "text"
                                         },
                                         {
                                             "key": "is_customer",
-                                            "value": "{{customer_test_is_customer}}",
+                                            "value": "False",
+                                            "description": "boolean(true=customer, false=prospects, default=False)",
                                             "type": "text"
                                         }
                                     ]
@@ -127,7 +134,7 @@
                                         ""
                                     ]
                                 },
-                                "description": "A management and a sales user are allowed to create prospects and customers.  \nIf the \"is_customer\" field is \"true\". The user is automatically set as the sales contact. Otherwise, the \"sales_contact_id\" is set to null.\n\n# Permissions\n\n*   The user must be connected and has its JWT.\n*   The user must be part of the management or sales role. (# not implemented yet)"
+                                "description": "A management and a sales user are allowed to create prospects and customers.  \nIf the \"is_customer\" field is \"true\". The user is automatically set as the sales contact. Otherwise, the \"sales_contact_id\" is set to null.\n\n## Permissions\n\n*   The user must be connected and has its JWT.\n*   The user must be part of the management or sales role. (# not implemented yet)"
                             },
                             "response": []
                         },
@@ -160,7 +167,7 @@
                                         ""
                                     ]
                                 },
-                                "description": "The user can see the list of all customers. The customers in the returned list depends on the role of the user.\n\n# Content\n\n*   If the user has the role \"management\" he can see every customers in the DB.\n*   if the user has the role \"sales\" he can see every prospects + customers that are related to him.\n*   if the user has the role \"support\", he can see every customers that are related to him."
+                                "description": "The user can see the list of all customers. The customers in the returned list depend on the role of the user.\n\n## Permissions\n\n*   The user must be connected with its JWT.\n*   The user must be a member of management, support, or sales role.\n    \n\n## Content\n\nThe customer list displayed depends on the user's role.\n\n*   **management**: every prospect and customer are displayed.\n*   **sales**: every prospect and customer that is attributed to him/her.\n*   **support**: every customer attributed to him/her."
                             },
                             "response": []
                         },
@@ -172,7 +179,30 @@
                             },
                             "request": {
                                 "method": "GET",
-                                "header": []
+                                "header": [],
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/customers?search=Doe",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "customers"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "search",
+                                            "value": "Doe",
+                                            "description": "last_name, first_name, email"
+                                        }
+                                    ]
+                                },
+                                "description": "The list of customers can be filtered.\n\n## Permissions\n\n*   The user must be connected with his JWT\n*   The user must be a member of the management, sales, or support role.\n    \n\n## Content\n\nThe result of the filters and/or the search can only be part of the list accessible to the user\n\n## Filters\n\nSearch by: first_name, last_name or email\n\nExample /?search=last_name"
                             },
                             "response": []
                         },
@@ -186,7 +216,7 @@
                                 "method": "GET",
                                 "header": [],
                                 "url": {
-                                    "raw": "http://127.0.0.1:8000/crm/customers/2/",
+                                    "raw": "http://127.0.0.1:8000/crm/customers/:pk/",
                                     "protocol": "http",
                                     "host": [
                                         "127",
@@ -198,11 +228,17 @@
                                     "path": [
                                         "crm",
                                         "customers",
-                                        "2",
+                                        ":pk",
                                         ""
+                                    ],
+                                    "variable": [
+                                        {
+                                            "key": "pk",
+                                            "value": "1"
+                                        }
                                     ]
                                 },
-                                "description": "The user can access the customers details depending on his role."
+                                "description": "The user can access the customer's details depending on his role.\n\n## Permissions\n\n*   The user must be connected with his JWT\n*   The user must be a member of the management, sales, or support role.\n    \n\n## Content\n\nThe customer is displayed according to the user's role, i.e:\n\n*   **management**: any customer/prospects in the database\n*   **sales**: any prospects or customers assigned to him/her\n*   **support**: any customer assigned to him/her"
                             },
                             "response": []
                         },
@@ -216,52 +252,11 @@
                                 "method": "PUT",
                                 "header": [],
                                 "body": {
-                                    "mode": "formdata",
-                                    "formdata": [
-                                        {
-                                            "key": "first_name",
-                                            "value": "Giuseppe_test",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "first_name",
-                                            "value": "{{customer_test_first_name}}",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "last_name",
-                                            "value": "{{customer_test_last_name}}",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "email",
-                                            "value": "{{customer_test_email}}",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "phone_number",
-                                            "value": "{{customer_test_phone_number}}",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "mobile",
-                                            "value": "{{customer_test_mobile}}",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "company_name",
-                                            "value": "{{customer_test_company}}",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "is_customer",
-                                            "value": "true",
-                                            "type": "text"
-                                        }
-                                    ]
+                                    "mode": "raw",
+                                    "raw": "{\r\n    \"first_name\": \"John\",\r\n    \"last_name\": \"Doe\",\r\n    \"email\": \"JohnDoe@gmail.com\",\r\n    \"phone\": null,\r\n    \"mobile\": null,\r\n    \"company_name\": \"GitHub\",\r\n    \"status\": true\r\n}"
                                 },
                                 "url": {
-                                    "raw": "http://127.0.0.1:8000/crm/customers/2/",
+                                    "raw": "http://127.0.0.1:8000/crm/customers/:pk/",
                                     "protocol": "http",
                                     "host": [
                                         "127",
@@ -273,10 +268,17 @@
                                     "path": [
                                         "crm",
                                         "customers",
-                                        "2",
+                                        ":pk",
                                         ""
+                                    ],
+                                    "variable": [
+                                        {
+                                            "key": "pk",
+                                            "value": "1"
+                                        }
                                     ]
-                                }
+                                },
+                                "description": "A user from the sales or management role can modify a prospect/customer.\n\nWhen the modified customer is converted (is_customer=true), the connected user is automatically designated as the sales contact of this customer.\n\nIf a customer is converted (is_customer=True), it can only be changed via Django Admin.\n\n## Permissions\n\n*   The user must be connected with his/her JWT.\n*   The user must be a member of the sales or management role.\n    \n\n## Fields\n\nrequired fields: last_names, first_name, email\n\noptional fields: phone, mobile, company_name, is_signed(default=False)"
                             },
                             "response": []
                         },
@@ -294,7 +296,7 @@
                                     "formdata": []
                                 },
                                 "url": {
-                                    "raw": "http://127.0.0.1:8000/crm/customers/3/",
+                                    "raw": "http://127.0.0.1:8000/crm/customers/:pk/",
                                     "protocol": "http",
                                     "host": [
                                         "127",
@@ -306,11 +308,17 @@
                                     "path": [
                                         "crm",
                                         "customers",
-                                        "3",
+                                        ":pk",
                                         ""
+                                    ],
+                                    "variable": [
+                                        {
+                                            "key": "pk",
+                                            "value": "1"
+                                        }
                                     ]
                                 },
-                                "description": "A user from the 'management' or 'sales' roles can delete a customer from the database."
+                                "description": "A user from the sales team or a manager can delete a lead (is_customer= False).\n\n## Permissions\n\n*   The user must be connected with his JWT\n*   The user must be a member of the sales team or a manager\n*   A converted customer cannot be deleted"
                             },
                             "response": []
                         }
@@ -601,7 +609,7 @@
     ],
     "variable": [
         {
-            "id": "c0af505e-10ad-448e-9662-436f5fa8b9f1",
+            "id": "d08c9fcf-83ef-496d-b740-520762dfe051",
             "key": "baseUrl",
             "value": "{{baseUrl}}",
             "type": "string"
