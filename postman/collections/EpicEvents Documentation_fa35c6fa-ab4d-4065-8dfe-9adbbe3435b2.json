@@ -2,7 +2,7 @@
     "info": {
         "_postman_id": "052df2cc-576c-4dda-bb24-b1c3c2c6199e",
         "name": "EpicEvents Documentation",
-        "description": "This is a RESTful API designed for an event management company.\n\nThe app allows users to create and update:\n\n*   customer database\n*   contract database linked to customers\n*   event database linked to a specific contract\n    \n\nThe access rights of the API are determined by the 'role' of their users.\n\nThe database is implemented with Django ORM and PostgreSQL\n\n# Administration\n\nThe Django administration site is accessible via [http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/).\n\nThis access is possible for all users of the management team.\n\nThey can create / modify / delete all objects related to users, customers, contracts and events.\n\nNote that managers can also access all CRM endpoints and have the same permissions to interact with all customers, contracts and events, within the limits of the allowed HTTP methods.",
+        "description": "This is a RESTful API designed for an event management company.\n\nThe app allows users to create and update:\n\n*   customer database\n*   contract database linked to customers\n*   event database linked to a specific contract\n    \n\nThe access rights of the API are determined by the 'role' of their users.\n\nThe database is implemented with Django ORM and PostgreSQL\n\n# Administration\n\nThe Django administration site is accessible via [http://127.0.0.1:8000/admin/](https://desktop.postman.com/?desktopVersion=9.15.2&userId=17750814&teamId=2583414).\n\nThis access is possible for all users of the management team.\n\nThey can create/modify/delete all objects related to users, customers, contracts, and events.\n\nNote that managers can also access all CRM endpoints and have the same permissions to interact with all customers, contracts, and events within the limits of the allowed HTTP methods.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
@@ -48,13 +48,13 @@
                                 ""
                             ]
                         },
-                        "description": "This endpoint needs a created user by the management team to work.  \nThe management team has to **create a user in Django Admin**.\n\nA user can send a **POST** request to this endpoint. If the data entered is validated by the API then it **returns a JWT Token**.  \nThis token will allow you to access all the endpoints of the API. **It has a lifetime of 30 days**.  \nAfter that period, you will have to refresh it."
+                        "description": "This endpoint needs a created user by the management team to work. The management team has to **create a user in Django Admin**.\n\nA user can send a **POST** request to this endpoint. If data is validated by the API, it **returns a JWT Token**. This token will allow you to access all the endpoints of the API. **It has a lifetime of 30 days**. After that period, you will have to refresh it."
                     },
                     "response": []
                 }
             ],
             "id": "e1b54bca-870e-4bea-8e52-9511745be173",
-            "description": "JWT (JSON Web Token) authentication is used.\n\nUsers are divided into three roles that determine authorized access to the various points of the API:\n\n*   management\n*   sales\n*   support\n    \n\n  \nThe user's role is determined by a Manager via Django admin at the time of creation, and can be modified afterwards."
+            "description": "JWT (JSON Web Token) authentication is used.\n\nUsers are divided into three roles that determine authorized access to the various points of the API:\n\n*   management\n*   sales\n*   support\n    \n\nThe user's role is determined by a Manager via Django admin at the time of creation and can be modified afterward."
         },
         {
             "name": "CRM",
@@ -63,262 +63,325 @@
                     "name": "Customers",
                     "item": [
                         {
-                            "name": "Customers",
-                            "item": [
-                                {
-                                    "name": "create_customer",
-                                    "id": "72232c3e-886f-40ce-a118-8000c448fdd3",
-                                    "protocolProfileBehavior": {
-                                        "disableBodyPruning": true
-                                    },
-                                    "request": {
-                                        "method": "POST",
-                                        "header": [],
-                                        "body": {
-                                            "mode": "formdata",
-                                            "formdata": [
-                                                {
-                                                    "key": "first_name",
-                                                    "value": "{{customer_test_first_name}}",
-                                                    "type": "text"
-                                                },
-                                                {
-                                                    "key": "last_name",
-                                                    "value": "{{customer_test_last_name}}",
-                                                    "type": "text"
-                                                },
-                                                {
-                                                    "key": "email",
-                                                    "value": "{{customer_test_email}}",
-                                                    "type": "text"
-                                                },
-                                                {
-                                                    "key": "phone_number",
-                                                    "value": "{{customer_test_phone_number}}",
-                                                    "type": "text"
-                                                },
-                                                {
-                                                    "key": "mobile",
-                                                    "value": "{{customer_test_mobile}}",
-                                                    "type": "text"
-                                                },
-                                                {
-                                                    "key": "company_name",
-                                                    "value": "{{customer_test_company}}",
-                                                    "type": "text"
-                                                },
-                                                {
-                                                    "key": "is_customer",
-                                                    "value": "{{customer_test_is_customer}}",
-                                                    "type": "text"
-                                                }
-                                            ]
+                            "name": "create a customer",
+                            "id": "72232c3e-886f-40ce-a118-8000c448fdd3",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "first_name",
+                                            "value": "{{customer_test_first_name}}",
+                                            "type": "text"
                                         },
-                                        "url": {
-                                            "raw": "http://127.0.0.1:8000/crm/customers/",
-                                            "protocol": "http",
-                                            "host": [
-                                                "127",
-                                                "0",
-                                                "0",
-                                                "1"
-                                            ],
-                                            "port": "8000",
-                                            "path": [
-                                                "crm",
-                                                "customers",
-                                                ""
-                                            ]
+                                        {
+                                            "key": "last_name",
+                                            "value": "{{customer_test_last_name}}",
+                                            "type": "text"
                                         },
-                                        "description": "A user from the management or sales team can create a prospect or a customer.\n\nIf the customer created has the field \"is_customer\" set to true, the user that created the new customer is automatically set as the sales contact.\n\nIf the field \"is_customer\" is set to False, the \"sales_contact_id\" is set to null."
-                                    },
-                                    "response": []
+                                        {
+                                            "key": "email",
+                                            "value": "{{customer_test_email}}",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "phone_number",
+                                            "value": "{{customer_test_phone_number}}",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "mobile",
+                                            "value": "{{customer_test_mobile}}",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "company_name",
+                                            "value": "{{customer_test_company}}",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "is_customer",
+                                            "value": "{{customer_test_is_customer}}",
+                                            "type": "text"
+                                        }
+                                    ]
                                 },
-                                {
-                                    "name": "get_customers",
-                                    "id": "29175a45-c44f-4609-857f-4822f6eec9fe",
-                                    "protocolProfileBehavior": {
-                                        "disableBodyPruning": true
-                                    },
-                                    "request": {
-                                        "method": "GET",
-                                        "header": [],
-                                        "body": {
-                                            "mode": "formdata",
-                                            "formdata": []
-                                        },
-                                        "url": {
-                                            "raw": "http://127.0.0.1:8000/crm/customers/",
-                                            "protocol": "http",
-                                            "host": [
-                                                "127",
-                                                "0",
-                                                "0",
-                                                "1"
-                                            ],
-                                            "port": "8000",
-                                            "path": [
-                                                "crm",
-                                                "customers",
-                                                ""
-                                            ]
-                                        },
-                                        "description": "The user can see the list of all customers. The customers in the returned list depends on the role of the user.\n\n# Content\n\n*   If the user has the role \"management\" he can see every customers in the DB.\n*   if the user has the role \"sales\" he can see every prospects + customers that are related to him.\n*   if the user has the role \"support\", he can see every customers that are related to him."
-                                    },
-                                    "response": []
-                                }
-                            ],
-                            "id": "60eb3cb0-5e73-4494-bdb8-8b86a08f2ab2"
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/customers/",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "customers",
+                                        ""
+                                    ]
+                                },
+                                "description": "A management and a sales user are allowed to create prospects and customers.  \nIf the \"is_customer\" field is \"true\". The user is automatically set as the sales contact. Otherwise, the \"sales_contact_id\" is set to null.\n\n# Permissions\n\n*   The user must be connected and has its JWT.\n*   The user must be part of the management or sales role. (# not implemented yet)"
+                            },
+                            "response": []
                         },
                         {
-                            "name": "Cutomer Details",
-                            "item": [
-                                {
-                                    "name": "get_customer",
-                                    "id": "07d28913-bbb1-415d-b88c-a7388648ffa8",
-                                    "protocolProfileBehavior": {
-                                        "disableBodyPruning": true
-                                    },
-                                    "request": {
-                                        "method": "GET",
-                                        "header": [],
-                                        "url": {
-                                            "raw": "http://127.0.0.1:8000/crm/customers/2/",
-                                            "protocol": "http",
-                                            "host": [
-                                                "127",
-                                                "0",
-                                                "0",
-                                                "1"
-                                            ],
-                                            "port": "8000",
-                                            "path": [
-                                                "crm",
-                                                "customers",
-                                                "2",
-                                                ""
-                                            ]
-                                        },
-                                        "description": "The user can access the customers details depending on his role."
-                                    },
-                                    "response": []
+                            "name": "customers list",
+                            "id": "29175a45-c44f-4609-857f-4822f6eec9fe",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": []
                                 },
-                                {
-                                    "name": "put_customer",
-                                    "id": "2b3ed2e2-e55c-4448-abb4-d5311e894db4",
-                                    "protocolProfileBehavior": {
-                                        "disableBodyPruning": true
-                                    },
-                                    "request": {
-                                        "method": "PUT",
-                                        "header": [],
-                                        "body": {
-                                            "mode": "formdata",
-                                            "formdata": [
-                                                {
-                                                    "key": "first_name",
-                                                    "value": "{{customer_test_first_name}}",
-                                                    "type": "text"
-                                                },
-                                                {
-                                                    "key": "last_name",
-                                                    "value": "{{customer_test_last_name}}",
-                                                    "type": "text"
-                                                },
-                                                {
-                                                    "key": "email",
-                                                    "value": "{{customer_test_email}}",
-                                                    "type": "text"
-                                                },
-                                                {
-                                                    "key": "phone_number",
-                                                    "value": "{{customer_test_phone_number}}",
-                                                    "type": "text"
-                                                },
-                                                {
-                                                    "key": "mobile",
-                                                    "value": "{{customer_test_mobile}}",
-                                                    "type": "text"
-                                                },
-                                                {
-                                                    "key": "company_name",
-                                                    "value": "{{customer_test_company}}",
-                                                    "type": "text"
-                                                },
-                                                {
-                                                    "key": "is_customer",
-                                                    "value": "{{customer_test_is_customer}}",
-                                                    "type": "text",
-                                                    "disabled": true
-                                                }
-                                            ]
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/customers/",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "customers",
+                                        ""
+                                    ]
+                                },
+                                "description": "The user can see the list of all customers. The customers in the returned list depends on the role of the user.\n\n# Content\n\n*   If the user has the role \"management\" he can see every customers in the DB.\n*   if the user has the role \"sales\" he can see every prospects + customers that are related to him.\n*   if the user has the role \"support\", he can see every customers that are related to him."
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "customers filter list",
+                            "id": "7e9861ad-3730-4727-a367-9077416d754b",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "GET",
+                                "header": []
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "customer details",
+                            "id": "07d28913-bbb1-415d-b88c-a7388648ffa8",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/customers/2/",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "customers",
+                                        "2",
+                                        ""
+                                    ]
+                                },
+                                "description": "The user can access the customers details depending on his role."
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "customer updates",
+                            "id": "2b3ed2e2-e55c-4448-abb4-d5311e894db4",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "PUT",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "first_name",
+                                            "value": "Giuseppe_test",
+                                            "type": "text"
                                         },
-                                        "url": {
-                                            "raw": "http://127.0.0.1:8000/crm/customers/2/",
-                                            "protocol": "http",
-                                            "host": [
-                                                "127",
-                                                "0",
-                                                "0",
-                                                "1"
-                                            ],
-                                            "port": "8000",
-                                            "path": [
-                                                "crm",
-                                                "customers",
-                                                "2",
-                                                ""
-                                            ]
+                                        {
+                                            "key": "first_name",
+                                            "value": "{{customer_test_first_name}}",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "last_name",
+                                            "value": "{{customer_test_last_name}}",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "email",
+                                            "value": "{{customer_test_email}}",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "phone_number",
+                                            "value": "{{customer_test_phone_number}}",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "mobile",
+                                            "value": "{{customer_test_mobile}}",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "company_name",
+                                            "value": "{{customer_test_company}}",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "is_customer",
+                                            "value": "true",
+                                            "type": "text"
                                         }
-                                    },
-                                    "response": []
+                                    ]
                                 },
-                                {
-                                    "name": "delete_customer",
-                                    "id": "00a6f426-79a9-44c2-970a-ffab96eaa9f8",
-                                    "protocolProfileBehavior": {
-                                        "disableBodyPruning": true
-                                    },
-                                    "request": {
-                                        "method": "DELETE",
-                                        "header": [],
-                                        "body": {
-                                            "mode": "formdata",
-                                            "formdata": []
-                                        },
-                                        "url": {
-                                            "raw": "http://127.0.0.1:8000/crm/customers/13/",
-                                            "protocol": "http",
-                                            "host": [
-                                                "127",
-                                                "0",
-                                                "0",
-                                                "1"
-                                            ],
-                                            "port": "8000",
-                                            "path": [
-                                                "crm",
-                                                "customers",
-                                                "13",
-                                                ""
-                                            ]
-                                        },
-                                        "description": "A user from the 'management' or 'sales' roles can delete a customer from the database."
-                                    },
-                                    "response": []
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/customers/2/",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "customers",
+                                        "2",
+                                        ""
+                                    ]
                                 }
-                            ],
-                            "id": "05f6e124-f2f8-4664-b319-acf154810e1d"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "customer delete",
+                            "id": "00a6f426-79a9-44c2-970a-ffab96eaa9f8",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "DELETE",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": []
+                                },
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/customers/3/",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "customers",
+                                        "3",
+                                        ""
+                                    ]
+                                },
+                                "description": "A user from the 'management' or 'sales' roles can delete a customer from the database."
+                            },
+                            "response": []
                         }
                     ],
-                    "id": "04a5212d-748e-45d4-b672-bdb92d4c18c8"
+                    "id": "60eb3cb0-5e73-4494-bdb8-8b86a08f2ab2",
+                    "description": "These endpoints group all access to the customers in the database.  \nCustomers can be divided into two groups:\n\n*   potential customers (prospects)\n*   customers (customers)."
                 },
                 {
                     "name": "Contracts",
                     "item": [
                         {
-                            "name": "contract_list",
+                            "name": "create_contract",
                             "id": "f9c05e70-997c-4165-baf8-8c19b872d234",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "project_name",
+                                            "value": "{{contract_test_project_name}}",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "amount",
+                                            "value": "{{contract_test_amount}}",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "payment_due_date",
+                                            "value": "{{contract_test_payment_due_date}}",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "is_signed",
+                                            "value": "{{contract_test_is_signed}}",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "customer",
+                                            "value": "{{contract_test_customer}}",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/contracts/",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "contracts",
+                                        ""
+                                    ]
+                                }
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "get_contracts",
+                            "id": "9e246638-3234-4434-8dcd-5337c8e9e8fb",
                             "protocolProfileBehavior": {
                                 "disableBodyPruning": true
                             },
@@ -340,12 +403,13 @@
                                         "contracts",
                                         ""
                                     ]
-                                }
+                                },
+                                "description": "The user can see the list of customer contracts assigned to him/her according to his/her role.\n\n# Permission\n\n*   The user must be connected and have a JWT Token\n\n# Content\n\nThe list of contracts displayed depends on the user's role, i.e:\n\nIf the user has the role 'sales' he can see every contracts where he is the sales contact.\n\nIf the user has the role 'support' he can see every contracts where he is the support contact\n\nIf the user has the role 'management' he can see every contracts in the database."
                             },
                             "response": []
                         },
                         {
-                            "name": "contract_detail",
+                            "name": "get_contract",
                             "id": "825dd76a-1d18-4732-8eb2-0f65476df659",
                             "protocolProfileBehavior": {
                                 "disableBodyPruning": true
@@ -354,7 +418,7 @@
                                 "method": "GET",
                                 "header": [],
                                 "url": {
-                                    "raw": "http://127.0.0.1:8000/crm/contracts/1",
+                                    "raw": "http://127.0.0.1:8000/crm/contracts/1/",
                                     "protocol": "http",
                                     "host": [
                                         "127",
@@ -366,26 +430,51 @@
                                     "path": [
                                         "crm",
                                         "contracts",
-                                        "1"
+                                        "1",
+                                        ""
                                     ]
                                 }
                             },
                             "response": []
+                        },
+                        {
+                            "name": "put_contract",
+                            "id": "785515db-7f53-4699-9fc7-92a2606756fd",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "PUT",
+                                "header": []
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "delete_contract",
+                            "id": "e37b945f-f3a8-4a5b-aebe-d5d6b4c42bc3",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "DELETE",
+                                "header": []
+                            },
+                            "response": []
                         }
                     ],
-                    "id": "c4d313e5-b43c-4445-bce9-f8a850ac5ae1"
+                    "id": "24b5da16-a05c-40a7-bd02-b2fb81f9d8e3"
                 },
                 {
                     "name": "Events",
                     "item": [
                         {
-                            "name": "event_list",
+                            "name": "create_event",
                             "id": "c196fac6-585b-48aa-a1cf-8554e0fe4cc1",
                             "protocolProfileBehavior": {
                                 "disableBodyPruning": true
                             },
                             "request": {
-                                "method": "GET",
+                                "method": "POST",
                                 "header": [],
                                 "url": {
                                     "raw": "http://127.0.0.1:8000/crm/events/",
@@ -407,7 +496,7 @@
                             "response": []
                         },
                         {
-                            "name": "event_detail",
+                            "name": "get_events",
                             "id": "c378d312-8c0e-4db5-a94c-251fbf66ecac",
                             "protocolProfileBehavior": {
                                 "disableBodyPruning": true
@@ -433,12 +522,49 @@
                                 }
                             },
                             "response": []
+                        },
+                        {
+                            "name": "get_event",
+                            "id": "31e4530d-65e0-43a0-ab3d-926962a0dd27",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "GET",
+                                "header": []
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "put_event",
+                            "id": "ffe88f34-5a40-450d-8981-f9e9fe120434",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "PUT",
+                                "header": []
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "delete_event",
+                            "id": "7a6fa36b-3355-458a-80aa-03adefd0d819",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "DELETE",
+                                "header": []
+                            },
+                            "response": []
                         }
                     ],
-                    "id": "e5c86c5a-da3f-4f3b-85ee-388957b8035a"
+                    "id": "68fbeed0-58ee-4f08-8815-c4696d2e0dd0"
                 }
             ],
-            "id": "df10d1ca-6a38-49e8-9628-96659d58b483"
+            "id": "df10d1ca-6a38-49e8-9628-96659d58b483",
+            "description": "To access the API, you will first need to have a JWT. Please contact a user from the management 'role' to create you a user account and give you access to the API.\n\nThe CRM part of the API gives you access to Customers, Contracts and Events endpoints.\n\nWe will give you more details for each endpoints"
         }
     ],
     "auth": {
@@ -475,7 +601,7 @@
     ],
     "variable": [
         {
-            "id": "ebc8818f-e721-4652-80c7-a914b5b60106",
+            "id": "c0af505e-10ad-448e-9662-436f5fa8b9f1",
             "key": "baseUrl",
             "value": "{{baseUrl}}",
             "type": "string"
