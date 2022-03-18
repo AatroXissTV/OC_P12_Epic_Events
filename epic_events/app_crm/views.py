@@ -1,6 +1,6 @@
 # app_crm/views.py
 # created 07/03/2022 at 09:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 17/03/2022 at 16:49 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 18/03/2022 at 10:49 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/views.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.12"
+__version__ = "0.1.13"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -83,6 +83,26 @@ class CustomerDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CustomerSerializer
 
+    def update(self, request, *args, **kwargs):
+        serializer = CustomerSerializer(data=request.data)
+
+        if serializer.is_valid(raise_exception=True):
+            customer = self.get_object()
+            if customer.is_customer is True:
+                if serializer.validated_data['is_customer'] is False:
+                    return Response(
+                        {'detail': 'You cannot change the customer status.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            elif customer.is_customer is False:
+                if serializer.validated_data['is_customer'] is True:
+                    serializer.validated_data['sales_contact_id'] = self.request.user  # noqa
+
+            # problem on saving a PUT request
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ContractList(generics.ListCreateAPIView):
     serializer_class = ContractSerializer
@@ -98,16 +118,22 @@ class ContractList(generics.ListCreateAPIView):
         elif self.request.user.role == 'support':
             return Contract.objects.filter(
                 support_contact_id=self.request.user)
-        else:
+        elif self.request.user.role == 'management':
             return Contract.objects.all()
+        else:
+            return Response(
+                {'detail': 'You are not allowed to access this resource.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
     def post(self, request, *args, **kwargs):
-        data = request.data.copy()
-        serializer = ContractSerializer(data=data)
+        serializer = ContractSerializer(data=request.data)
 
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
+            serializer.validated_data['sales_contact_id'] = request.user # noqa
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ContractDetail(generics.ListCreateAPIView):
