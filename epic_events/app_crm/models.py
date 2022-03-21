@@ -1,6 +1,6 @@
 # app_crm/models.py
 # created 02/03/2022 at 12:06 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 15/03/2022 at 16:11 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 21/03/2022 at 11:44 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/models.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.9"
+__version__ = "0.1.16"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -128,6 +128,7 @@ class Event(models.Model):
     event_date = models.DateTimeField()
     attendees = models.IntegerField()
     notes = models.TextField()
+    is_finished = models.BooleanField(default=False)
 
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)

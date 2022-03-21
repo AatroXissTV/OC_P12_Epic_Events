@@ -1,6 +1,6 @@
 # app_crm/views.py
 # created 07/03/2022 at 09:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 21/03/2022 at 10:38 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 21/03/2022 at 11:44 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/views.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.15"
+__version__ = "0.1.16"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -39,78 +39,72 @@ from .serializers import (
 from .permissions import (
     ContractPermissions,
     CustomerPermissions,
+    EventPermissions,
 )
 
 # other imports & constants
 
 
 class CustomerList(generics.ListCreateAPIView):
+    """
+    This endpoint handles
+    the GET and POST requests for the Customer endpoint.
+    """
     serializer_class = CustomerSerializer
     permission_classes = [IsAuthenticated, CustomerPermissions]
     filter_backends = [SearchFilter]
     search_fields = ['^last_name', '^first_name', '^email']
 
     def get_queryset(self):
-        if self.request.user.role == 'management':
-            return Customer.objects.all()
-
-        elif self.request.user.role == 'sales':
+        if self.request.user.role == 'sales':
             prospects = Customer.objects.filter(is_customer=False)
-            own_customers = Customer.objects.filter(
-                is_customer=True,
-                sales_contact_id=self.request.user.id
-            )
+            own_customers = Customer.objects.filter(sales_contact_id=self.request.user.id)  # noqa
             return prospects | own_customers
-
         elif self.request.user.role == 'support':
-            return Customer.objects.filter(
-                contract__support_contact_id=self.request.user.id
-            )
-
-        else:
-            return Response(
-                {'detail': 'You are not allowed to access this resource.'},
-                status=status.HTTP_403_FORBIDDEN
-            )
+            return Customer.objects.filter(contract__support_contact_id=self.request.user.id)  # noqa
+        return Customer.objects.all()
 
     def post(self, request, *args, **kwargs):
         serializer = CustomerSerializer(data=request.data)
 
         if serializer.is_valid(raise_exception=True):
             if serializer.validated_data['is_customer'] is True:
-                serializer.validated_data['sales_contact_id'] = self.request.user  # noqa
+                serializer.validated_data['sales_contact_id'] = request.user
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CustomerDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    This endpoint handles
+    the GET, PUT and DELETE requests for the Customer endpoint.
+    """
     queryset = Customer.objects.all()
-    http_method_names = ['get', 'put', 'delete']
-    permission_classes = [IsAuthenticated, CustomerPermissions]
     serializer_class = CustomerSerializer
+    permission_classes = [IsAuthenticated, CustomerPermissions]
+    http_method_names = ['get', 'put', 'delete']
 
-    def update(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         serializer = CustomerSerializer(data=request.data)
 
         if serializer.is_valid(raise_exception=True):
             customer = self.get_object()
-            if customer.is_customer is True:
-                if serializer.validated_data['is_customer'] is False:
-                    return Response(
-                        {'detail': 'You cannot change the customer status.'},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-            elif customer.is_customer is False:
-                if serializer.validated_data['is_customer'] is True:
-                    serializer.validated_data['sales_contact_id'] = self.request.user  # noqa
-
+            if customer.is_customer is True and serializer.validated_data['is_customer'] is False:  # noqa
+                return Response({"error": "Cannot change to prospect"},
+                                status=status.HTTP_400_BAD_REQUEST)
+            elif serializer.validated_data['is_customer'] is True:
+                serializer.validated_data['sales_contact_id'] = request.user
             serializer.save()
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ContractList(generics.ListCreateAPIView):
+    """
+    This endpoint handles
+    the GET and POST requests for the Contract endpoint.
+    """
     serializer_class = ContractSerializer
     permission_classes = [IsAuthenticated, ContractPermissions]
     filter_backends = [SearchFilter]
@@ -119,91 +113,81 @@ class ContractList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         if self.request.user.role == 'sales':
-            return Contract.objects.filter(
-                customer__sales_contact_id=self.request.user)
+            return Contract.objects.filter(customer__sales_contact_id=self.request.user)  # noqa
         elif self.request.user.role == 'support':
-            return Contract.objects.filter(
-                support_contact_id=self.request.user)
-        elif self.request.user.role == 'management':
-            return Contract.objects.all()
-        else:
-            return Response(
-                {'detail': 'You are not allowed to access this resource.'},
-                status=status.HTTP_403_FORBIDDEN
-            )
+            return Contract.objects.filter(support_contact_id=self.request.user)  # noqa
+        return Contract.objects.all()
 
     def post(self, request, *args, **kwargs):
         serializer = ContractSerializer(data=request.data)
 
         if serializer.is_valid(raise_exception=True):
-            if serializer.validated_data['customer'].is_customer is False:
-                return Response(
-                    {'detail': 'You cannot create a contract for a prospect.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            elif serializer.validated_data['is_signed'] is True:
-                if serializer.validated_data['support_contact_id'] is None:
-                    return Response(
-                        {'detail': 'You cannot create a signed contract without a support contact.'},  # noqa
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-                elif serializer.validated_data['support_contact_id'].role != 'support':  # noqa
-                    return Response(
-                        {'detail': 'You cannot create a signed contract with a non-support contact.'},  # noqa
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
+            serializer.validated_data['customer'].sales_contact_id = request.user  # noqa
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ContractDetail(generics.ListCreateAPIView):
+class ContractDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    This endpoint handles
+    the GET, PUT and DELETE requests for the Contract endpoint.
+    """
     queryset = Contract.objects.all()
+    http_method_names = ['get', 'put', 'delete']
     serializer_class = ContractSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, ContractPermissions]
 
 
 class EventList(generics.ListCreateAPIView):
+    """
+    This endpoint handles
+    the GET and POST requests for the Event endpoint.
+    """
     serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, ContractPermissions]
     filter_backends = [SearchFilter]
     search_fields = ['^customer__first_name', '^customer__last_name',
                      '^customer__email', '=date_created']
 
     def get_queryset(self):
         if self.request.user.role == 'sales':
-            return Event.objects.filter(
-                contract_id__customer__sales_contact_id=self.request.user)
+            return Event.objects.filter(contract_id__customer__sales_contact_id=self.request.user)  # noqa
         elif self.request.user.role == 'support':
-            return Event.objects.filter(
-                contract_id__support_contact_id=self.request.user)
-        else:
-            return Event.objects.all()
+            return Event.objects.filter(contract_id__support_contact_id=self.request.user)  # noqa
+        return Event.objects.all()
 
     def post(self, request, *args, **kwargs):
-        data = request.data.copy()
-        contract = generics.get_object_or_404(Contract, id=data['contract_id'])
-        if contract.is_signed is False:
-            return Response(
-                {'error': 'Contract is not signed'},
-                status=status.HTTP_400_BAD_REQUEST)
-        serializer = EventSerializer(data=data)
+        serializer = EventSerializer(data=request.data)
 
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
+            contract = generics.get_object_or_404(Contract, pk=serializer.validated_data['contract_id'])  # noqa
+            if contract.is_signed is False:
+                return Response({"error": "Contract is not signed"},
+                                status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class EventDetail(generics.RetrieveUpdateDestroyAPIView):
+    """
+    This endpoint handles
+    the GET, PUT and DELETE requests for the Event endpoint.
+    """
     queryset = Event.objects.all()
+    http_method_names = ['get', 'put', 'delete']
     serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, EventPermissions]
 
-    def update(self, request, *args, **kwargs):
-        data = request.data.copy()
-        serializer = EventSerializer(data=data)
+    def put(self, request, *args, **kwargs):
+        event = self.get_object()
+        serializer = EventSerializer(data=request.data, instance=event)
 
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
+            if request.user.role == 'support' and serializer.validated_data['contract_id'] != event.contract_id.id:  # noqa
+                return Response({"error": "You cannot update this event"},
+                                status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
