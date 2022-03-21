@@ -1,6 +1,6 @@
 # app_crm/views.py
 # created 07/03/2022 at 09:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 21/03/2022 at 11:44 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 21/03/2022 at 14:26 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/views.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.16"
+__version__ = "0.1.17"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -18,6 +18,7 @@ __status__ = "Development"
 # standard library imports
 
 # third party imports
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
@@ -52,8 +53,9 @@ class CustomerList(generics.ListCreateAPIView):
     """
     serializer_class = CustomerSerializer
     permission_classes = [IsAuthenticated, CustomerPermissions]
-    filter_backends = [SearchFilter]
-    search_fields = ['^last_name', '^first_name', '^email']
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    search_fields = ['^last_name', '^email']
+    filterset_fields = ['is_customer']
 
     def get_queryset(self):
         if self.request.user.role == 'sales':
@@ -107,9 +109,10 @@ class ContractList(generics.ListCreateAPIView):
     """
     serializer_class = ContractSerializer
     permission_classes = [IsAuthenticated, ContractPermissions]
-    filter_backends = [SearchFilter]
-    search_fields = ['^customer__first_name', '^customer__last_name',
-                     '^customer__company_name', '=date_created', '=amount']
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    search_fields = ['^customer__last_name', '^customer__email'
+                     '=date_created', '=amount']
+    filterset_fields = ['is_signed']
 
     def get_queryset(self):
         if self.request.user.role == 'sales':
@@ -146,9 +149,10 @@ class EventList(generics.ListCreateAPIView):
     """
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated, ContractPermissions]
-    filter_backends = [SearchFilter]
-    search_fields = ['^customer__first_name', '^customer__last_name',
-                     '^customer__email', '=date_created']
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    search_fields = ['^customer__last_name', '^customer__email',
+                     '=date_created']
+    filterset_fields = ['is_finished']
 
     def get_queryset(self):
         if self.request.user.role == 'sales':
@@ -170,7 +174,7 @@ class EventList(generics.ListCreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class EventDetail(generics.RetrieveUpdateDestroyAPIView):
+class EventDetail(generics.RetrieveUpdateAPIView):
     """
     This endpoint handles
     the GET, PUT and DELETE requests for the Event endpoint.

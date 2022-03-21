@@ -1,6 +1,6 @@
 # app_crm/permissions.py
 # created 18/03/2022 at 15:05 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 21/03/2022 at 11:44 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 21/03/2022 at 14:46 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/permissions.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.16"
+__version__ = "0.1.17"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -55,7 +55,7 @@ class CustomerPermissions(permissions.BasePermission):
             elif request.user.role == 'support' and request.method in permissions.SAFE_METHODS:  # noqa
                 return customer in Customer.objects.filter(contract__support_contact_id=request.user)  # noqa
             elif request.user.role == 'sales':
-                return request.role == customer.sales_contact or customer.is_customer is False  # noqa
+                return request.user.role == customer.sales_contact_id or customer.is_customer is False  # noqa
 
         except KeyError:
             if request.user.role == 'support':
