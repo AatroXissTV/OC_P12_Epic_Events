@@ -1,6 +1,6 @@
 # app_crm/views.py
 # created 07/03/2022 at 09:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 18/03/2022 at 10:49 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 21/03/2022 at 10:38 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/views.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.14"
+__version__ = "0.1.15"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -36,19 +36,24 @@ from .serializers import (
     ContractSerializer,
     EventSerializer
 )
+from .permissions import (
+    ContractPermissions,
+    CustomerPermissions,
+)
 
 # other imports & constants
 
 
 class CustomerList(generics.ListCreateAPIView):
     serializer_class = CustomerSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CustomerPermissions]
     filter_backends = [SearchFilter]
-    search_fields = ['^first_name', '^last_name', '^email']
+    search_fields = ['^last_name', '^first_name', '^email']
 
     def get_queryset(self):
         if self.request.user.role == 'management':
             return Customer.objects.all()
+
         elif self.request.user.role == 'sales':
             prospects = Customer.objects.filter(is_customer=False)
             own_customers = Customer.objects.filter(
@@ -56,10 +61,12 @@ class CustomerList(generics.ListCreateAPIView):
                 sales_contact_id=self.request.user.id
             )
             return prospects | own_customers
+
         elif self.request.user.role == 'support':
             return Customer.objects.filter(
                 contract__support_contact_id=self.request.user.id
             )
+
         else:
             return Response(
                 {'detail': 'You are not allowed to access this resource.'},
@@ -80,7 +87,7 @@ class CustomerList(generics.ListCreateAPIView):
 class CustomerDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Customer.objects.all()
     http_method_names = ['get', 'put', 'delete']
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CustomerPermissions]
     serializer_class = CustomerSerializer
 
     def update(self, request, *args, **kwargs):
@@ -98,18 +105,17 @@ class CustomerDetail(generics.RetrieveUpdateDestroyAPIView):
                 if serializer.validated_data['is_customer'] is True:
                     serializer.validated_data['sales_contact_id'] = self.request.user  # noqa
 
-            # problem on saving a PUT request
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ContractList(generics.ListCreateAPIView):
     serializer_class = ContractSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, ContractPermissions]
     filter_backends = [SearchFilter]
     search_fields = ['^customer__first_name', '^customer__last_name',
-                     '^customer__email', '=date_created', '=amount']
+                     '^customer__company_name', '=date_created', '=amount']
 
     def get_queryset(self):
         if self.request.user.role == 'sales':
