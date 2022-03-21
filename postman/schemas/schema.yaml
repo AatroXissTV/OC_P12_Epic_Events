@@ -1,9 +1,354 @@
 openapi: 3.0.2
 info:
-  title: Epic_Events API
-  version: 1.0.0
-  description: Epic_Events API
+  title: 'Epic_Events API'
+  version: '1.0.0'
 paths:
+  /crm/customers/:
+    get:
+      operationId: listCustomers
+      description: 'This endpoint handles
+
+        the GET and POST requests for the Customer endpoint.'
+      parameters:
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Customer'
+          description: ''
+      tags:
+      - crm
+    post:
+      operationId: createCustomer
+      description: 'This endpoint handles
+
+        the GET and POST requests for the Customer endpoint.'
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Customer'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Customer'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: ''
+      tags:
+      - crm
+  /crm/customers/{id}/:
+    get:
+      operationId: retrieveCustomer
+      description: 'This endpoint handles
+
+        the GET, PUT and DELETE requests for the Customer endpoint.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this customer.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: ''
+      tags:
+      - crm
+    put:
+      operationId: updateCustomer
+      description: 'This endpoint handles
+
+        the GET, PUT and DELETE requests for the Customer endpoint.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this customer.
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Customer'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Customer'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          description: ''
+      tags:
+      - crm
+    delete:
+      operationId: destroyCustomer
+      description: 'This endpoint handles
+
+        the GET, PUT and DELETE requests for the Customer endpoint.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this customer.
+        schema:
+          type: string
+      responses:
+        '204':
+          description: ''
+      tags:
+      - crm
+  /crm/contracts/:
+    get:
+      operationId: listContracts
+      description: 'This endpoint handles
+
+        the GET and POST requests for the Contract endpoint.'
+      parameters:
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contract'
+          description: ''
+      tags:
+      - crm
+    post:
+      operationId: createContract
+      description: 'This endpoint handles
+
+        the GET and POST requests for the Contract endpoint.'
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contract'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Contract'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Contract'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contract'
+          description: ''
+      tags:
+      - crm
+  /crm/contracts/{id}/:
+    get:
+      operationId: retrieveContract
+      description: 'This endpoint handles
+
+        the GET, PUT and DELETE requests for the Contract endpoint.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this contract.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contract'
+          description: ''
+      tags:
+      - crm
+    put:
+      operationId: updateContract
+      description: 'This endpoint handles
+
+        the GET, PUT and DELETE requests for the Contract endpoint.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this contract.
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contract'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Contract'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Contract'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contract'
+          description: ''
+      tags:
+      - crm
+    delete:
+      operationId: destroyContract
+      description: 'This endpoint handles
+
+        the GET, PUT and DELETE requests for the Contract endpoint.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this contract.
+        schema:
+          type: string
+      responses:
+        '204':
+          description: ''
+      tags:
+      - crm
+  /crm/events/:
+    get:
+      operationId: listEvents
+      description: 'This endpoint handles
+
+        the GET and POST requests for the Event endpoint.'
+      parameters:
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+          description: ''
+      tags:
+      - crm
+    post:
+      operationId: createEvent
+      description: 'This endpoint handles
+
+        the GET and POST requests for the Event endpoint.'
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Event'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+      tags:
+      - crm
+  /crm/events/{id}/:
+    get:
+      operationId: retrieveEvent
+      description: 'This endpoint handles
+
+        the GET, PUT and DELETE requests for the Event endpoint.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this event.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+      tags:
+      - crm
+    put:
+      operationId: updateEvent
+      description: 'This endpoint handles
+
+        the GET, PUT and DELETE requests for the Event endpoint.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this event.
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Event'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: ''
+      tags:
+      - crm
   /login/:
     post:
       operationId: createTokenObtainPair
@@ -62,6 +407,125 @@ paths:
       - login
 components:
   schemas:
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        first_name:
+          type: string
+          maxLength: 25
+        last_name:
+          type: string
+          maxLength: 25
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone_number:
+          type: string
+          maxLength: 20
+        mobile:
+          type: string
+          maxLength: 20
+        company_name:
+          type: string
+          maxLength: 100
+        is_customer:
+          type: boolean
+        date_created:
+          type: string
+          format: date-time
+          readOnly: true
+        date_updated:
+          type: string
+          format: date-time
+          readOnly: true
+        sales_contact_id:
+          type: integer
+          nullable: true
+      required:
+      - first_name
+      - last_name
+      - email
+      - phone_number
+      - mobile
+      - company_name
+    Contract:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        project_name:
+          type: string
+          maxLength: 100
+        amount:
+          type: string
+          format: decimal
+          multipleOf: 0.01
+          maximum: 100000000
+          minimum: -100000000
+        payment_due_date:
+          type: string
+          format: date-time
+        is_signed:
+          type: boolean
+        date_created:
+          type: string
+          format: date-time
+          readOnly: true
+        date_updated:
+          type: string
+          format: date-time
+          readOnly: true
+        customer:
+          type: integer
+        support_contact_id:
+          type: integer
+          nullable: true
+      required:
+      - project_name
+      - amount
+      - payment_due_date
+      - customer
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        event_name:
+          type: string
+          maxLength: 100
+        event_date:
+          type: string
+          format: date-time
+        attendees:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        notes:
+          type: string
+        is_finished:
+          type: boolean
+        date_created:
+          type: string
+          format: date-time
+          readOnly: true
+        date_updated:
+          type: string
+          format: date-time
+          readOnly: true
+        contract_id:
+          type: integer
+      required:
+      - event_name
+      - event_date
+      - attendees
+      - notes
+      - contract_id
     TokenObtainPair:
       type: object
       properties:

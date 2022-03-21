@@ -253,7 +253,12 @@
                                 "header": [],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\r\n    \"first_name\": \"John\",\r\n    \"last_name\": \"Doe\",\r\n    \"email\": \"JohnDoe@gmail.com\",\r\n    \"phone\": null,\r\n    \"mobile\": null,\r\n    \"company_name\": \"GitHub\",\r\n    \"status\": true\r\n}"
+                                    "raw": "{\r\n    \"first_name\": \"John\",\r\n    \"last_name\": \"Doe\",\r\n    \"email\": \"JohnDoe@gmail.com\",\r\n    \"phone_number\": \"0100000000\",\r\n    \"mobile\": \"0600000000\",\r\n    \"company_name\": \"GitHub\",\r\n    \"is_customer\": true\r\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
                                 },
                                 "url": {
                                     "raw": "http://127.0.0.1:8000/crm/customers/:pk/",
@@ -278,7 +283,7 @@
                                         }
                                     ]
                                 },
-                                "description": "A user from the sales or management role can modify a prospect/customer.\n\nWhen the modified customer is converted (is_customer=true), the connected user is automatically designated as the sales contact of this customer.\n\nIf a customer is converted (is_customer=True), it can only be changed via Django Admin.\n\n## Permissions\n\n*   The user must be connected with his/her JWT.\n*   The user must be a member of the sales or management role.\n    \n\n## Fields\n\nrequired fields: last_names, first_name, email\n\noptional fields: phone, mobile, company_name, is_signed(default=False)"
+                                "description": "A user from the sales or management role can modify a prospect/customer.\n\nWhen the modified customer is converted (is_customer=true), the connected user is automatically designated as the sales contact of this customer.\n\nIf a customer is converted (is_customer=True), it can only be changed via Django Admin.\n\n## Permissions\n\n*   The user must be connected with his/her JWT.\n*   The user must be a member of the sales or management role.\n    \n\n## Fields\n\nrequired fields: last_names, first_name, email, phone_number, mobile, company_name\n\noptional fields: is_signed(default=False)"
                             },
                             "response": []
                         },
@@ -314,7 +319,7 @@
                                     "variable": [
                                         {
                                             "key": "pk",
-                                            "value": "1"
+                                            "value": "2"
                                         }
                                     ]
                                 },
@@ -330,7 +335,7 @@
                     "name": "Contracts",
                     "item": [
                         {
-                            "name": "create_contract",
+                            "name": "create a contract",
                             "id": "f9c05e70-997c-4165-baf8-8c19b872d234",
                             "protocolProfileBehavior": {
                                 "disableBodyPruning": true
@@ -343,27 +348,32 @@
                                     "formdata": [
                                         {
                                             "key": "project_name",
-                                            "value": "{{contract_test_project_name}}",
+                                            "value": "Titre Projet",
+                                            "description": "string  - Required",
                                             "type": "text"
                                         },
                                         {
                                             "key": "amount",
-                                            "value": "{{contract_test_amount}}",
+                                            "value": "40000",
+                                            "description": "float (2 decimals) - Required",
                                             "type": "text"
                                         },
                                         {
                                             "key": "payment_due_date",
-                                            "value": "{{contract_test_payment_due_date}}",
+                                            "value": "2022-06-15",
+                                            "description": "date (string) - Required",
                                             "type": "text"
                                         },
                                         {
                                             "key": "is_signed",
-                                            "value": "{{contract_test_is_signed}}",
+                                            "value": "False",
+                                            "description": "boolean (true = signed, false = not signed, default=False)",
                                             "type": "text"
                                         },
                                         {
                                             "key": "customer",
-                                            "value": "{{contract_test_customer}}",
+                                            "value": "3",
+                                            "description": "int - Required",
                                             "type": "text"
                                         }
                                     ]
@@ -383,12 +393,13 @@
                                         "contracts",
                                         ""
                                     ]
-                                }
+                                },
+                                "description": "A user can create a contract for his converted customers.\n\nWhen the contract is created, the logged-in user is automatically designated as the sales contact.\n\n## Permissions\n\n*   The user must be logged in with his JWT.\n*   The user must be a manager or part of the sales team.\n*   The customer of the contract must be one of the customers assigned to the user."
                             },
                             "response": []
                         },
                         {
-                            "name": "get_contracts",
+                            "name": "contracts list",
                             "id": "9e246638-3234-4434-8dcd-5337c8e9e8fb",
                             "protocolProfileBehavior": {
                                 "disableBodyPruning": true
@@ -412,12 +423,46 @@
                                         ""
                                     ]
                                 },
-                                "description": "The user can see the list of customer contracts assigned to him/her according to his/her role.\n\n# Permission\n\n*   The user must be connected and have a JWT Token\n\n# Content\n\nThe list of contracts displayed depends on the user's role, i.e:\n\nIf the user has the role 'sales' he can see every contracts where he is the sales contact.\n\nIf the user has the role 'support' he can see every contracts where he is the support contact\n\nIf the user has the role 'management' he can see every contracts in the database."
+                                "description": "The user can see the list of customer contracts assigned to him/her according to his/her role.\n\nThe list of contracts can be filtered.\n\n## Permissions\n\n*   The user must be connected with his JWT.\n*   The user must be a member of a management, sales, or support role.\n    \n\n## Content\n\nThe displayed contracts depend on the user's role, i-e:\n\n*   The **management** role can see every contract in the database\n*   The **sales** role can see contracts where he is the sales contact\n*   The **support** role can see contracts where he is the support contact."
                             },
                             "response": []
                         },
                         {
-                            "name": "get_contract",
+                            "name": "contracts filter list",
+                            "id": "545d7107-8ff5-40ca-8ac1-8cb237dce0aa",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/contracts?search=Doe",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "contracts"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "search",
+                                            "value": "Doe"
+                                        }
+                                    ]
+                                },
+                                "description": "The list of contracts can be filtered.\n\n## Permissions\n\n*   The user must be connected with his JWT.\n*   The user must have the role management, sales, or support.\n    \n\n## Content\n\nThe results of the filters and/or the search can only be part of the list accessible to the user (see contacts list)\n\n## Filter by\n\nThe user can search by: last_name / first_name / company_name / date_created / amount (ex=?search=Doe)"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "contract details",
                             "id": "825dd76a-1d18-4732-8eb2-0f65476df659",
                             "protocolProfileBehavior": {
                                 "disableBodyPruning": true
@@ -426,7 +471,7 @@
                                 "method": "GET",
                                 "header": [],
                                 "url": {
-                                    "raw": "http://127.0.0.1:8000/crm/contracts/1/",
+                                    "raw": "http://127.0.0.1:8000/crm/contracts/:pk/",
                                     "protocol": "http",
                                     "host": [
                                         "127",
@@ -438,51 +483,180 @@
                                     "path": [
                                         "crm",
                                         "contracts",
-                                        "1",
+                                        ":pk",
                                         ""
+                                    ],
+                                    "variable": [
+                                        {
+                                            "key": "pk",
+                                            "value": "1"
+                                        }
                                     ]
-                                }
+                                },
+                                "description": "The user can access the contract's details depending on his role.\n\n## Permissions\n\n*   The user must be connected with his JWT\n*   The user must be a member of the management, sales, or support role.\n    \n\n## Content\n\nThe customer is displayed according to the user's role, i.e:\n\n*   **management**: any contracts in the database\n*   **sales**: any contracts assigned to him/her\n*   **support**: any contracts assigned to him/her"
                             },
                             "response": []
                         },
                         {
-                            "name": "put_contract",
+                            "name": "contract updates",
                             "id": "785515db-7f53-4699-9fc7-92a2606756fd",
                             "protocolProfileBehavior": {
                                 "disableBodyPruning": true
                             },
                             "request": {
                                 "method": "PUT",
-                                "header": []
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\r\n    \"amount\": \"50000.50\",\r\n    \"payment_due_date\": \"2042-01-10\",\r\n    \"is_signed\": true,\r\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/contracts/:pk/",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "contracts",
+                                        ":pk",
+                                        ""
+                                    ],
+                                    "variable": [
+                                        {
+                                            "key": "pk",
+                                            "value": "1"
+                                        }
+                                    ]
+                                },
+                                "description": "The user can modify a contract.\n\n## Permissions\n\n*   The user must be logged in with his JWT\n*   The user must have the management or sales role\n*   The customer's contract must be a customer\n*   A contract signed can only be modified via Django admin.\n    \n\n## Fields\n\n**Required**: customer, amount, date"
                             },
                             "response": []
                         },
                         {
-                            "name": "delete_contract",
+                            "name": "contract delete",
                             "id": "e37b945f-f3a8-4a5b-aebe-d5d6b4c42bc3",
                             "protocolProfileBehavior": {
                                 "disableBodyPruning": true
                             },
                             "request": {
                                 "method": "DELETE",
-                                "header": []
+                                "header": [],
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/contracts/:pk/",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "contracts",
+                                        ":pk",
+                                        ""
+                                    ],
+                                    "variable": [
+                                        {
+                                            "key": "pk",
+                                            "value": "1"
+                                        }
+                                    ]
+                                },
+                                "description": "A user from the sales team or a manager can delete a lead (is_customer= False).\n\n## Permissions\n\n*   The user must be connected with his JWT\n*   The user must be a member of the sales team or a manager\n*   A converted contract cannot be deleted"
                             },
                             "response": []
                         }
                     ],
-                    "id": "24b5da16-a05c-40a7-bd02-b2fb81f9d8e3"
+                    "id": "24b5da16-a05c-40a7-bd02-b2fb81f9d8e3",
+                    "description": "These endpoints allow authorized users to access contracts in the database."
                 },
                 {
                     "name": "Events",
                     "item": [
                         {
-                            "name": "create_event",
+                            "name": "create an event",
                             "id": "c196fac6-585b-48aa-a1cf-8554e0fe4cc1",
                             "protocolProfileBehavior": {
                                 "disableBodyPruning": true
                             },
                             "request": {
                                 "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "event_name",
+                                            "value": "Event 1",
+                                            "description": "string - Required",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "event_date",
+                                            "value": "2042-07-10",
+                                            "description": "datetime (string) - required",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "attendees",
+                                            "value": "10",
+                                            "description": "int - Required",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "is_finished",
+                                            "value": "False",
+                                            "description": "boolean(finished=True, unfinished=False, default=False)",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "contract_id",
+                                            "value": "1",
+                                            "description": "int - Required",
+                                            "type": "text"
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/events/",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "events",
+                                        ""
+                                    ]
+                                },
+                                "description": "A user can create an event.\n\nAn event is a one-to-one relationship with a contract.\n\nWhen an event is created a member of the management **has to attribute the event to a support contact in the Django admin.**\n\nThe event status (finished or not) can only be determined by a manager in Django admin.\n\n## Permissions\n\n*   The user must be connected with his JWT.\n*   The user has to be a manager or a salesperson.\n*   The contract assigned to the event has to be signed.\n*   An event cannot be associated with multiple contracts\n*   The contract has to be associated with a customer."
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "events list",
+                            "id": "c378d312-8c0e-4db5-a94c-251fbf66ecac",
+                            "protocolProfileBehavior": {
+                                "disableBodyPruning": true
+                            },
+                            "request": {
+                                "method": "GET",
                                 "header": [],
                                 "url": {
                                     "raw": "http://127.0.0.1:8000/crm/events/",
@@ -499,13 +673,14 @@
                                         "events",
                                         ""
                                     ]
-                                }
+                                },
+                                "description": "The user can see the list of the events that are attributed to him.\n\n## Permissions\n\n*   The user must be connected with the JWT.\n*   The user must have management, support or sales role.\n    \n\n## Content\n\nThe displayed events list depends on the user's role.\n\n*   **management**: every events in the database\n*   **sales**: every events where he is the sales contact of the customer\n*   **support**: every events where he is the support contact."
                             },
                             "response": []
                         },
                         {
-                            "name": "get_events",
-                            "id": "c378d312-8c0e-4db5-a94c-251fbf66ecac",
+                            "name": "events filter list",
+                            "id": "79703a02-9cae-4a42-86df-ab3e37b86ced",
                             "protocolProfileBehavior": {
                                 "disableBodyPruning": true
                             },
@@ -513,7 +688,7 @@
                                 "method": "GET",
                                 "header": [],
                                 "url": {
-                                    "raw": "http://127.0.0.1:8000/crm/events/1",
+                                    "raw": "http://127.0.0.1:8000/crm/events/?last_name=Doe",
                                     "protocol": "http",
                                     "host": [
                                         "127",
@@ -525,26 +700,57 @@
                                     "path": [
                                         "crm",
                                         "events",
-                                        "1"
+                                        ""
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "last_name",
+                                            "value": "Doe"
+                                        }
                                     ]
-                                }
+                                },
+                                "description": "The list of contracts can be filtered.\n\n## Permissions\n\n*   The user must be connected with his JWT.\n*   The user must have the role management, sales, or support.\n    \n\n## Content\n\nThe results of the filters and/or the search can only be part of the list accessible to the user (see contacts list)\n\n## Filter by\n\nThe user can search by: last_name / first_name / company_name / date_created / (ex=?search=Doe)"
                             },
                             "response": []
                         },
                         {
-                            "name": "get_event",
+                            "name": "event details",
                             "id": "31e4530d-65e0-43a0-ab3d-926962a0dd27",
                             "protocolProfileBehavior": {
                                 "disableBodyPruning": true
                             },
                             "request": {
                                 "method": "GET",
-                                "header": []
+                                "header": [],
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/events/:pk/",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "events",
+                                        ":pk",
+                                        ""
+                                    ],
+                                    "variable": [
+                                        {
+                                            "key": "pk",
+                                            "value": "1"
+                                        }
+                                    ]
+                                },
+                                "description": "The user can access the event's details depending on his role.\n\n## Permissions\n\n*   The user must be connected with his JWT\n*   The user must be a member of the management, sales, or support role.\n    \n\n## Content\n\nThe event is displayed according to the user's role, i.e:\n\n*   **management**: any events in the database\n*   **sales**: any events assigned to him/her\n*   **support**: any events assigned to him/her"
                             },
                             "response": []
                         },
                         {
-                            "name": "put_event",
+                            "name": "event update",
                             "id": "ffe88f34-5a40-450d-8981-f9e9fe120434",
                             "protocolProfileBehavior": {
                                 "disableBodyPruning": true
@@ -554,21 +760,10 @@
                                 "header": []
                             },
                             "response": []
-                        },
-                        {
-                            "name": "delete_event",
-                            "id": "7a6fa36b-3355-458a-80aa-03adefd0d819",
-                            "protocolProfileBehavior": {
-                                "disableBodyPruning": true
-                            },
-                            "request": {
-                                "method": "DELETE",
-                                "header": []
-                            },
-                            "response": []
                         }
                     ],
-                    "id": "68fbeed0-58ee-4f08-8815-c4696d2e0dd0"
+                    "id": "68fbeed0-58ee-4f08-8815-c4696d2e0dd0",
+                    "description": "These endpoints allow users to access events in the database."
                 }
             ],
             "id": "df10d1ca-6a38-49e8-9628-96659d58b483",
@@ -609,7 +804,7 @@
     ],
     "variable": [
         {
-            "id": "d08c9fcf-83ef-496d-b740-520762dfe051",
+            "id": "39e1ad2a-8b5b-45e4-ae48-883bcfa56433",
             "key": "baseUrl",
             "value": "{{baseUrl}}",
             "type": "string"
