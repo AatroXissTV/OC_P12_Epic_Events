@@ -1,6 +1,6 @@
 # app_crm/admin.py
 # created 08/03/2022 at 09:07 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 15/03/2022 at 16:11 by Antoine 'AatroXiss' BEAUDESSONx
+# last modified 22/03/2022 at 10:39 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/admin.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.9"
+__version__ = "0.1.18"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -59,6 +59,8 @@ class CustomerAdmin(admin.ModelAdmin):
 
     @staticmethod
     def sales_contact_name(obj):
+        if obj.sales_contact_id is None:
+            return "-"
         first_name = obj.sales_contact_id.first_name
         last_name = obj.sales_contact_id.last_name.upper()
         contact_id = obj.sales_contact_id.id

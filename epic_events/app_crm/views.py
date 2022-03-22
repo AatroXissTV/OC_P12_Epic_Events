@@ -1,6 +1,6 @@
 # app_crm/views.py
 # created 07/03/2022 at 09:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 21/03/2022 at 14:26 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 22/03/2022 at 10:39 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/views.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.17"
+__version__ = "0.1.18"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -19,6 +19,7 @@ __status__ = "Development"
 
 # third party imports
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.viewsets import ModelViewSet
 from rest_framework import generics, status
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
@@ -46,11 +47,7 @@ from .permissions import (
 # other imports & constants
 
 
-class CustomerList(generics.ListCreateAPIView):
-    """
-    This endpoint handles
-    the GET and POST requests for the Customer endpoint.
-    """
+class CustomerViewSet(ModelViewSet):
     serializer_class = CustomerSerializer
     permission_classes = [IsAuthenticated, CustomerPermissions]
     filter_backends = [SearchFilter, DjangoFilterBackend]
@@ -76,22 +73,11 @@ class CustomerList(generics.ListCreateAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-class CustomerDetail(generics.RetrieveUpdateDestroyAPIView):
-    """
-    This endpoint handles
-    the GET, PUT and DELETE requests for the Customer endpoint.
-    """
-    queryset = Customer.objects.all()
-    serializer_class = CustomerSerializer
-    permission_classes = [IsAuthenticated, CustomerPermissions]
-    http_method_names = ['get', 'put', 'delete']
-
-    def put(self, request, *args, **kwargs):
-        serializer = CustomerSerializer(data=request.data)
+    def update(self, request, *args, **kwargs):
+        customer = self.get_object()
+        serializer = CustomerSerializer(data=request.data, instance=customer)
 
         if serializer.is_valid(raise_exception=True):
-            customer = self.get_object()
             if customer.is_customer is True and serializer.validated_data['is_customer'] is False:  # noqa
                 return Response({"error": "Cannot change to prospect"},
                                 status=status.HTTP_400_BAD_REQUEST)
@@ -102,11 +88,7 @@ class CustomerDetail(generics.RetrieveUpdateDestroyAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ContractList(generics.ListCreateAPIView):
-    """
-    This endpoint handles
-    the GET and POST requests for the Contract endpoint.
-    """
+class ContractViewSet(ModelViewSet):
     serializer_class = ContractSerializer
     permission_classes = [IsAuthenticated, ContractPermissions]
     filter_backends = [SearchFilter, DjangoFilterBackend]
@@ -130,25 +112,18 @@ class ContractList(generics.ListCreateAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-class ContractDetail(generics.RetrieveUpdateDestroyAPIView):
-    """
-    This endpoint handles
-    the GET, PUT and DELETE requests for the Contract endpoint.
-    """
-    queryset = Contract.objects.all()
-    http_method_names = ['get', 'put', 'delete']
-    serializer_class = ContractSerializer
-    permission_classes = [IsAuthenticated, ContractPermissions]
+    def delete(self, request, *args, **kwargs):
+        contract = self.get_object()
+        if contract.is_signed is True:
+            return Response({"error": "Cannot delete signed contract"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        contract.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class EventList(generics.ListCreateAPIView):
-    """
-    This endpoint handles
-    the GET and POST requests for the Event endpoint.
-    """
+class EventViewSet(ModelViewSet):
     serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated, ContractPermissions]
+    permission_classes = [IsAuthenticated, EventPermissions]
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ['^customer__last_name', '^customer__email',
                      '=date_created']
@@ -173,18 +148,7 @@ class EventList(generics.ListCreateAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-class EventDetail(generics.RetrieveUpdateAPIView):
-    """
-    This endpoint handles
-    the GET, PUT and DELETE requests for the Event endpoint.
-    """
-    queryset = Event.objects.all()
-    http_method_names = ['get', 'put', 'delete']
-    serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated, EventPermissions]
-
-    def put(self, request, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         event = self.get_object()
         serializer = EventSerializer(data=request.data, instance=event)
 
