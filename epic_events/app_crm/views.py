@@ -1,6 +1,6 @@
 # app_crm/views.py
 # created 07/03/2022 at 09:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 22/03/2022 at 10:39 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 22/03/2022 at 18:17 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/views.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.18"
+__version__ = "0.1.19"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -63,29 +63,17 @@ class CustomerViewSet(ModelViewSet):
             return Customer.objects.filter(contract__support_contact_id=self.request.user.id)  # noqa
         return Customer.objects.all()
 
-    def post(self, request, *args, **kwargs):
-        serializer = CustomerSerializer(data=request.data)
+    def perform_create(self, serializer):
+        serializer.save(sales_contact_id=self.request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if serializer.is_valid(raise_exception=True):
-            if serializer.validated_data['is_customer'] is True:
-                serializer.validated_data['sales_contact_id'] = request.user
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def update(self, request, *args, **kwargs):
+    def perform_update(self, serializer):
         customer = self.get_object()
-        serializer = CustomerSerializer(data=request.data, instance=customer)
-
-        if serializer.is_valid(raise_exception=True):
-            if customer.is_customer is True and serializer.validated_data['is_customer'] is False:  # noqa
-                return Response({"error": "Cannot change to prospect"},
-                                status=status.HTTP_400_BAD_REQUEST)
-            elif serializer.validated_data['is_customer'] is True:
-                serializer.validated_data['sales_contact_id'] = request.user
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if customer.is_customer and serializer.validated_data['is_customer']:
+            return Response({"error": "Cannot change customer to prospect"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        serializer.save(sales_contact_id=self.request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ContractViewSet(ModelViewSet):
@@ -103,21 +91,23 @@ class ContractViewSet(ModelViewSet):
             return Contract.objects.filter(support_contact_id=self.request.user)  # noqa
         return Contract.objects.all()
 
-    def post(self, request, *args, **kwargs):
-        serializer = ContractSerializer(data=request.data)
+    def perform_create(self, serializer):
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if serializer.is_valid(raise_exception=True):
-            serializer.validated_data['customer'].sales_contact_id = request.user  # noqa
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, *args, **kwargs):
+    def perform_update(self, serializer):
         contract = self.get_object()
         if contract.is_signed is True:
+            return Response({"error": "Cannot update signed contract"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def perform_destroy(self, instance):
+        if instance.is_signed is True:
             return Response({"error": "Cannot delete signed contract"},
                             status=status.HTTP_400_BAD_REQUEST)
-        contract.delete()
+        instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

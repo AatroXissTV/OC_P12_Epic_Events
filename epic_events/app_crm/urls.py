@@ -1,6 +1,6 @@
 # app_crm/urls.py
 # created 09/03/2022 at 09:55 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 22/03/2022 at 10:39 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 22/03/2022 at 18:17 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/urls.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.18"
+__version__ = "0.1.19"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -30,7 +30,8 @@ from . import views
 
 urlpatterns = [
     path('customers/',
-         views.CustomerViewSet.as_view({'get': 'list'}),
+         views.CustomerViewSet.as_view({'get': 'list',
+                                        'post': 'create'}),
          name='customers-list'),
     path('customers/<int:pk>/',
          views.CustomerViewSet.as_view({'get': 'retrieve',
