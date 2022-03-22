@@ -14,6 +14,8 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from datetime import timedelta
 
 # third-party imports
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # Django imports
 from pathlib import Path
@@ -26,6 +28,7 @@ from secret import (
     PASSWORD_DB,
     HOST_DB,
     PORT_DB,
+    SENTRY_DSN,
 )
 
 
@@ -175,21 +178,9 @@ SIMPLE_JWT = {
 }
 
 # logging
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': 'errors.log',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-    },
-}
+sentry_sdk.init(
+    dsn=SENTRY_DSN,
+    integrations=[DjangoIntegration()],
+    traces_sample_rate=1.0,
+    send_default_pii=True
+)
