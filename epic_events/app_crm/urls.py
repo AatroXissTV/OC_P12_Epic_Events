@@ -1,6 +1,6 @@
 # app_crm/urls.py
 # created 09/03/2022 at 09:55 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 09/03/2022 at 10:22 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 22/03/2022 at 10:39 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/urls.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.2"
+__version__ = "0.1.18"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -29,16 +29,27 @@ from . import views
 
 
 urlpatterns = [
-    path('customer/', views.CustomerList.as_view(), name='customer-list'),
-    path('customer/<int:pk>/',
-         views.CustomerDetail.as_view(),
+    path('customers/',
+         views.CustomerViewSet.as_view({'get': 'list'}),
+         name='customers-list'),
+    path('customers/<int:pk>/',
+         views.CustomerViewSet.as_view({'get': 'retrieve',
+                                        'put': 'update',
+                                        'delete': 'destroy'}),
          name='customer-detail'),
-    path('contracts/', views.ContractList.as_view(), name='contract-list'),
+    path('contracts/',
+         views.ContractViewSet.as_view({'get': 'list'}),
+         name='contract-list'),
     path('contracts/<int:pk>/',
-         views.ContractDetail.as_view(),
+         views.ContractViewSet.as_view({'get': 'retrieve',
+                                        'put': 'update'}),
          name='contract-detail'),
-    path('events/', views.EventList.as_view(), name='event-list'),
+    path('events/',
+         views.EventViewSet.as_view({'get': 'list'}),
+         name='event-list'),
     path('events/<int:pk>/',
-         views.EventDetail.as_view(),
+         views.EventViewSet.as_view({'get': 'retrieve',
+                                     'put': 'update',
+                                     'delete': 'destroy'}),
          name='event-detail'),
 ]
