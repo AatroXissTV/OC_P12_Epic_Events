@@ -1,6 +1,6 @@
 # app_crm/views.py
 # created 07/03/2022 at 09:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 22/03/2022 at 18:17 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 23/03/2022 at 09:40 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/views.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.19"
+__version__ = "0.1.20"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -126,26 +126,18 @@ class EventViewSet(ModelViewSet):
             return Event.objects.filter(contract_id__support_contact_id=self.request.user)  # noqa
         return Event.objects.all()
 
-    def post(self, request, *args, **kwargs):
-        serializer = EventSerializer(data=request.data)
+    def perform_create(self, serializer):
+        contract = generics.get_object_or_404(Contract, pk=serializer.contract_id)  # noqa
+        if contract.is_signed is False:
+            return Response({"error": "Contract is not signed"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        if serializer.is_valid(raise_exception=True):
-            contract = generics.get_object_or_404(Contract, pk=serializer.validated_data['contract_id'])  # noqa
-            if contract.is_signed is False:
-                return Response({"error": "Contract is not signed"},
-                                status=status.HTTP_400_BAD_REQUEST)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def update(self, request, *args, **kwargs):
+    def perform_update(self, serializer):
         event = self.get_object()
-        serializer = EventSerializer(data=request.data, instance=event)
-
-        if serializer.is_valid(raise_exception=True):
-            if request.user.role == 'support' and serializer.validated_data['contract_id'] != event.contract_id.id:  # noqa
-                return Response({"error": "You cannot update this event"},
-                                status=status.HTTP_400_BAD_REQUEST)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if event.is_finished is True:
+            return Response({"error": "Cannot update finished event"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
