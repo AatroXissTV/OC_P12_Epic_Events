@@ -1,6 +1,6 @@
 # app_crm/views.py
 # created 07/03/2022 at 09:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 23/03/2022 at 09:40 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 23/03/2022 at 11:19 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/views.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.20"
+__version__ = "0.1.21"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -39,9 +39,9 @@ from .serializers import (
     EventSerializer
 )
 from .permissions import (
-    ContractPermissions,
-    CustomerPermissions,
-    EventPermissions,
+    CanCreate,
+    CanEditCustomerOrContract,
+    CanUpdateEvent,
 )
 
 # other imports & constants
@@ -49,7 +49,8 @@ from .permissions import (
 
 class CustomerViewSet(ModelViewSet):
     serializer_class = CustomerSerializer
-    permission_classes = [IsAuthenticated, CustomerPermissions]
+    permission_classes = [IsAuthenticated, CanCreate,
+                          CanEditCustomerOrContract]
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ['^last_name', '^email']
     filterset_fields = ['is_customer']
@@ -78,7 +79,8 @@ class CustomerViewSet(ModelViewSet):
 
 class ContractViewSet(ModelViewSet):
     serializer_class = ContractSerializer
-    permission_classes = [IsAuthenticated, ContractPermissions]
+    permission_classes = [IsAuthenticated, CanCreate,
+                          CanEditCustomerOrContract]
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ['^customer__last_name', '^customer__email'
                      '=date_created', '=amount']
@@ -113,7 +115,7 @@ class ContractViewSet(ModelViewSet):
 
 class EventViewSet(ModelViewSet):
     serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated, EventPermissions]
+    permission_classes = [IsAuthenticated, CanCreate, CanUpdateEvent]
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ['^customer__last_name', '^customer__email',
                      '=date_created']
