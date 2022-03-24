@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.24"
+__version__ = "0.1.25"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -208,7 +208,7 @@ class CustomerDetailEndpointTest(CustomTestCase):
     Permissions:
         - GET: management, sales, and support
         - PUT: management, sales
-        - DELETE: management, sales
+        - DELETE: management
     """
 
     # GET tests
@@ -252,7 +252,7 @@ class CustomerDetailEndpointTest(CustomTestCase):
         for i in range(len(other_ids)):
             response = test_user.get(reverse('app_crm:customer-detail',
                                              kwargs={'pk': other_ids[i]}))
-            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.status_code, 404)
 
     def test_support_get_customer(self):
         """
@@ -273,7 +273,7 @@ class CustomerDetailEndpointTest(CustomTestCase):
         for i in range(len(other_ids)):
             response = test_user.get(reverse('app_crm:customer-detail',
                                              kwargs={'pk': other_ids[i]}))
-            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.status_code, 404)
 
     # PUT tests
     def test_management_put_prospects_to_customer(self):
@@ -323,7 +323,8 @@ class CustomerDetailEndpointTest(CustomTestCase):
                                              kwargs={'pk': prospect_ids[i]}),
                                      CUSTOMER_DATA, format='json')
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(Customer.objects.get(id=prospect_ids[i]).sales_contact_id, user.id)  # noqa
+            customer = Customer.objects.get(id=prospect_ids[i])
+            self.assertEqual(customer.sales_contact_id.id, user.id)  # noqa
 
     def test_sales_put_customer_to_prospect(self):
         """
@@ -344,7 +345,7 @@ class CustomerDetailEndpointTest(CustomTestCase):
         """
         support can't update prospects to customers
         - Assert:
-            - status code 400
+            - status code 404
         """
         user = User.objects.get(username='user_support')
         test_user = self.get_token_auth(user)
@@ -353,7 +354,7 @@ class CustomerDetailEndpointTest(CustomTestCase):
             response = test_user.put(reverse('app_crm:customer-detail',
                                              kwargs={'pk': prospect_ids[i]}),
                                      CUSTOMER_DATA, format='json')
-            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.status_code, 404)
 
     # DELETE tests
     def test_management_delete_prospect(self):
@@ -388,7 +389,7 @@ class CustomerDetailEndpointTest(CustomTestCase):
         """
         sales role can delete prospects
         - Assert:
-            - status code 204
+            - status code 403
         """
         user = User.objects.get(username='user_sales')
         test_user = self.get_token_auth(user)
@@ -396,13 +397,13 @@ class CustomerDetailEndpointTest(CustomTestCase):
         for i in range(len(prospect_ids)):
             response = test_user.delete(reverse('app_crm:customer-detail',
                                                 kwargs={'pk': prospect_ids[i]}))  # noqa
-            self.assertEqual(response.status_code, 204)
+            self.assertEqual(response.status_code, 403)
 
     def test_sales_delete_customer(self):
         """
         sales can't delete customers
         - Assert:
-            - status code 400
+            - status code 404
         """
         user = User.objects.get(username='user_sales')
         test_user = self.get_token_auth(user)
@@ -410,13 +411,13 @@ class CustomerDetailEndpointTest(CustomTestCase):
         for i in range(len(customer_ids)):
             response = test_user.delete(reverse('app_crm:customer-detail',
                                                 kwargs={'pk': customer_ids[i]}))  # noqa
-            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.status_code, 404)
 
     def test_support_delete_prsopect(self):
         """
         support can't delete prospects
         - Assert:
-            - status code 400
+            - status code 404
         """
         user = User.objects.get(username='user_support')
         test_user = self.get_token_auth(user)
@@ -424,4 +425,4 @@ class CustomerDetailEndpointTest(CustomTestCase):
         for i in range(len(prospect_ids)):
             response = test_user.delete(reverse('app_crm:customer-detail',
                                                 kwargs={'pk': prospect_ids[i]}))  # noqa 
-            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.status_code, 404)

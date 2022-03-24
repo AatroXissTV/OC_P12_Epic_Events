@@ -1,6 +1,6 @@
 # app_crm/permissions.py
 # created 18/03/2022 at 15:05 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 24/03/2022 at 10:14 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 23/03/2022 at 11:19 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/permissions.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.22"
+__version__ = "0.1.25"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -55,8 +55,12 @@ class CanEditCustomerOrContract(BasePermission):
                 return (obj.sales_contact_id == request.user
                         or request.user.role == 'management')
             if obj == Contract:
-                return (obj.customer.sales_contact_id == request.user
-                        or request.user.role == 'management')
+                if obj.customer.sales_contact_id == request.user.id:
+                    return True
+                if request.user.role == 'management':
+                    return True
+                else:
+                    return False
 
         if request.method == 'DELETE':
             return request.user.role == 'management'

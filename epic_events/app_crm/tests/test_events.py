@@ -25,8 +25,6 @@ __status__ = "Development"
 from .setup import CustomTestCase
 
 # other imports & constants
-CONTRACT_DATA = {}
-UPDATE_CONTRACT_DATA = {}
 
 
 class EventEndpointTests(CustomTestCase):

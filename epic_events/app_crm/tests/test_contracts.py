@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.24"
+__version__ = "0.1.25"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -29,8 +29,20 @@ from app_crm.models import Customer, Contract
 from .setup import CustomTestCase
 
 # other imports & constants
-CONTRACT_DATA = {}
-UPDATE_CONTRACT_DATA = {}
+CONTRACT_DATA = {
+    'project_name': 'Test Project',
+    'amount': '100',
+    'payment_due_date': '2020-01-01',
+    'is_signed': False,
+    'customer': 1
+}
+UPDATE_CONTRACT_DATA = {
+    'project_name': 'Test Project',
+    'amount': '100',
+    'payment_due_date': '2020-01-01',
+    'is_signed': True,
+    'customer': 1
+}
 
 
 class ContractEndpointTests(CustomTestCase):
@@ -57,19 +69,18 @@ class ContractEndpointTests(CustomTestCase):
         test_user = self.get_token_auth(user)
         response = test_user.post(self.contract_url, CONTRACT_DATA, format='json')  # noqa
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Contract.objects.count(), Contract.objects.count()+1)
-        self.assertEqual(response.data['sales_contact_id'], None)
+        self.assertEqual(response.data['support_contact_id'], None)
 
     def test_management_post_contract_for_prospects(self):
         """
-        management role can't create a contract for a prospect
+        management role can create a contract for a prospect
         - Assert:
-            - status code 403
+            - status code 201
         """
         user = User.objects.get(username='user_management')
         test_user = self.get_token_auth(user)
         response = test_user.post(self.contract_url, CONTRACT_DATA, format='json') # noqa
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_sales_post_contract(self):
         """
@@ -77,14 +88,13 @@ class ContractEndpointTests(CustomTestCase):
         - Assert:
             - status code 201
             - contract is created
-            - contract support is user.id
+            - contract support is None
         """
         user = User.objects.get(username='user_sales')
         test_user = self.get_token_auth(user)
         response = test_user.post(self.contract_url, CONTRACT_DATA, format='json')  # noqa
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Contract.objects.count(), Contract.objects.count()+1)
-        self.assertEqual(response.data['sales_contact_id'], user.id)
+        self.assertEqual(response.data['support_contact_id'], None)
 
     def test_sales_post_contract_for_prospects(self):
         """
@@ -136,7 +146,7 @@ class ContractEndpointTests(CustomTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for contract in response.data:
             customer = Customer.objects.get(id=contract['customer'])
-            self.assertEqual(customer.sales_contact_id, user.id)
+            self.assertEqual(customer.sales_contact_id.id, user.id)
 
     def test_support_get_contracts(self):
         """
@@ -209,6 +219,7 @@ class ContractDetailEndpointTest(CustomTestCase):
         - Assert:
             - status code 200
             - for i item status code is 200
+            - other id status code is 404
         """
         user = User.objects.get(username='user_support')
         test_user = self.get_token_auth(user)
@@ -221,7 +232,7 @@ class ContractDetailEndpointTest(CustomTestCase):
         for i in range(len(other_ids)):
             response = test_user.get(reverse('app_crm:contract-detail',
                                              kwargs={'pk': other_ids[i]}))
-            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.status_code, 404)
 
     # PUT tests
     def test_management_put_contract(self):
@@ -267,7 +278,7 @@ class ContractDetailEndpointTest(CustomTestCase):
         """
         support role can't update contracts
         - Assert:
-            - status code 403
+            - status code 404
         """
         user = User.objects.get(username='user_support')
         test_user = self.get_token_auth(user)
@@ -276,7 +287,7 @@ class ContractDetailEndpointTest(CustomTestCase):
             response = test_user.put(reverse('app_crm:contract-detail',
                                              kwargs={'pk': id_list[i]}),
                                      UPDATE_CONTRACT_DATA, format='json')
-            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.status_code, 404)
 
     # other methods
     def test_other_methods(self):
