@@ -1,6 +1,6 @@
 # app_crm/views.py
 # created 07/03/2022 at 09:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 23/03/2022 at 11:19 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 24/03/2022 at 10:14 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/views.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.21"
+__version__ = "0.1.22"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -72,7 +72,7 @@ class CustomerViewSet(ModelViewSet):
         customer = self.get_object()
         if customer.is_customer and serializer.validated_data['is_customer']:
             return Response({"error": "Cannot change customer to prospect"},
-                            status=status.HTTP_400_BAD_REQUEST)
+                            status=status.HTTP_403_FORBIDDEN)
         serializer.save(sales_contact_id=self.request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -99,7 +99,7 @@ class ContractViewSet(ModelViewSet):
 
     def perform_update(self, serializer):
         contract = self.get_object()
-        if contract.is_signed is True:
+        if contract.is_signed is True and serializer.validated_data['is_signed'] is False:  # noqa
             return Response({"error": "Cannot update signed contract"},
                             status=status.HTTP_400_BAD_REQUEST)
         serializer.save()

@@ -79,10 +79,8 @@ def check_sales_contact(sender, instance, *args, **kwargs):
     if instance.is_customer is True:
         if instance.sales_contact_id.role == 'sales':
             instance.sales_contact_id = instance.sales_contact_id
-        elif instance.sales_contact_id.role == 'management':
+        if instance.sales_contact_id.role == 'management':
             instance.sales_contact_id = None
-        else:
-            raise ValueError("The user is not a sales contact.")
     else:
         instance.sales_contact_id = None
 
