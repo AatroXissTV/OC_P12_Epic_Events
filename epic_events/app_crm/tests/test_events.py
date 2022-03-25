@@ -1,6 +1,6 @@
 # app_crm/tests/test_contracts.py
 # created 24/03/2022 at 10:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 25/03/2022 at 10:46 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 25/03/2022 at 10:49 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/tests/test_contracts.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.27"
+__version__ = "0.1.28"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -228,13 +228,69 @@ class EventDetailEndpointTest(CustomTestCase):
 
     # PUT tests
     def test_management_put_event_detail(self):
-        pass
+        """
+        management can update events
+        - Assert:
+            - status code 200
+            - response data is correct
+        """
+        user = User.objects.get(username='user_management')
+        test_user = self.get_token_auth(user)
+        id_list = self.get_id_list(Event.objects.all())
+        for id in range(len(id_list)):
+            response = test_user.put(reverse('app_crm:event-detail',
+                                             kwargs={'pk': id_list[id]}),
+                                     EVENT_DATA, format='json')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.data['contract_id'], EVENT_DATA['contract_id'])  # noqa: E501
 
     def test_sales_put_event_detail(self):
-        pass
+        """
+        sales role can only update events
+        where contract_id__contract__sales_contact == user.id
+        - Assert:
+            - status code 200
+            - response data is correct
+        """
+        user = User.objects.get(username='user_sales')
+        test_user = self.get_token_auth(user)
+        id_list = self.get_id_list(Event.objects.filter(contract_id__contract__sales_contact_id=user.id))  # noqa
+        for id in range(len(id_list)):
+            response = test_user.put(reverse('app_crm:event-detail',
+                                             kwargs={'pk': id_list[id]}),
+                                     EVENT_DATA, format='json')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.data['contract_id'], EVENT_DATA['contract_id'])  # noqa
+        other_id_list = self.get_id_list(Event.objects.exclude(contract_id__contract__sales_contact_id=user.id))  # noqa
+        for id in range(len(other_id_list)):
+            response = test_user.put(reverse('app_crm:event-detail',
+                                             kwargs={'pk': other_id_list[id]}),  # noqa
+                                     EVENT_DATA, format='json')
+            self.assertEqual(response.status_code, 403)
 
     def test_support_put_event_detail(self):
-        pass
+        """
+        support role can only update events
+        where they are assigned as support contact
+        - Assert:
+            - status code 200
+            - response data is correct
+        """
+        user = User.objects.get(username='user_support')
+        test_user = self.get_token_auth(user)
+        id_list = self.get_id_list(Event.objects.filter(contract_id__support_contact_id=user.id))  # noqa
+        for id in range(len(id_list)):
+            response = test_user.put(reverse('app_crm:event-detail',
+                                             kwargs={'pk': id_list[id]}),
+                                     EVENT_DATA, format='json')
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.data['contract_id'], EVENT_DATA['contract_id'])  # noqa
+        other_id_list = self.get_id_list(Event.objects.exclude(contract_id__support_contact_id=user.id))  # noqa
+        for id in range(len(other_id_list)):
+            response = test_user.put(reverse('app_crm:event-detail',
+                                             kwargs={'pk': other_id_list[id]}),  # noqa
+                                     EVENT_DATA, format='json')
+            self.assertEqual(response.status_code, 403)
 
     # DELETE tests
     def test_management_delete_event_detail(self):
