@@ -1,6 +1,6 @@
 # app_crm/serializers.py
 # created 07/03/2022 at 09:10 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 21/03/2022 at 10:38 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 25/03/2022 at 15:51 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/serializers.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.15"
+__version__ = "0.2.0"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -76,4 +76,5 @@ class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = '__all__'
-        read_only_fields = ('id', 'date_created', 'date_updated')
+        read_only_fields = ['id', 'date_created',
+                            'date_updated']

@@ -65,7 +65,8 @@ class CustomTestCase(APITestCase):
             last_name='Support',)
         call_command('loaddata', 'app_crm/fixtures/initial_data.json')
 
-    def get_token_auth(self, user):
+    def get_token_auth(self, username):
+        user = User.objects.get(username=username)
         data = {
             'username': user.username,
             'password': PASSWORD,
@@ -74,6 +75,17 @@ class CustomTestCase(APITestCase):
         token = response.data['access']
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
         return self.client
+
+    def get_token_auth_user(self, username):
+        user = User.objects.get(username=username)
+        data = {
+            'username': user.username,
+            'password': PASSWORD,
+        }
+        response = self.client.post(LOGIN_URL, data, format='json')
+        token = response.data['access']
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+        return self.client, user
 
     @staticmethod
     def get_id_list(queryset):

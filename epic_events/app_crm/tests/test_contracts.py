@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.25"
+__version__ = "0.2.0"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -24,24 +24,30 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 # local application imports
-from app_users.models import User
 from app_crm.models import Customer, Contract
 from .setup import CustomTestCase
 
 # other imports & constants
 CONTRACT_DATA = {
-    'project_name': 'Test Project',
+    'project_name': 'Unsigned contract',
     'amount': '100',
     'payment_due_date': '2020-01-01',
     'is_signed': False,
     'customer': 1
 }
 UPDATE_CONTRACT_DATA = {
-    'project_name': 'Test Project',
+    'project_name': 'Signed contract',
     'amount': '100',
     'payment_due_date': '2020-01-01',
     'is_signed': True,
     'customer': 1
+}
+PROSPECT_CONTRACT_DATA = {
+    'project_name': 'Prospect contract',
+    'amount': '100',
+    'payment_due_date': '2020-01-01',
+    'is_signed': False,
+    'customer': 3
 }
 
 
@@ -51,8 +57,17 @@ class ContractEndpointTests(CustomTestCase):
     where only POST and GET requests are allowed.
 
     Permissions:
-        - POST: management, sales
-        - GET: management, sales and support
+    - POST:
+        - 'user_management' can create contracts for customers - 201
+        - 'user_management' can't create contracts for prospects - 403
+        - 'user_sales' can create contracts for customers - 201
+        - 'user_sales' can't create contracts for prospects - 403
+        - 'user_support' is not authorized to use post method - 403
+    - GET:
+        - 'user_management' can get all contracts
+        - 'user_sales' can get contracts where they are the sales contact
+        - 'user_support' can get contracts where they are the support contact.
+    - OTHER METHODS:
     """
     contract_url = reverse('app_crm:contract-list')
 
@@ -62,12 +77,11 @@ class ContractEndpointTests(CustomTestCase):
         management role can create a contract for a customer
         - Assert:
             - status code 201
-            - contract is created
-            - contract support is none
+            - There is no support contact assigned to it.
         """
-        user = User.objects.get(username='user_management')
-        test_user = self.get_token_auth(user)
-        response = test_user.post(self.contract_url, CONTRACT_DATA, format='json')  # noqa
+        test_user = self.get_token_auth("user_management")
+        response = test_user.post(self.contract_url, CONTRACT_DATA,
+                                  format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['support_contact_id'], None)
 
@@ -75,24 +89,24 @@ class ContractEndpointTests(CustomTestCase):
         """
         management role can create a contract for a prospect
         - Assert:
-            - status code 201
+            - status code 403
         """
-        user = User.objects.get(username='user_management')
-        test_user = self.get_token_auth(user)
-        response = test_user.post(self.contract_url, CONTRACT_DATA, format='json') # noqa
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        test_user = self.get_token_auth("user_management")
+        response = test_user.post(self.contract_url, PROSPECT_CONTRACT_DATA,
+                                  format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_sales_post_contract(self):
         """
         sales role can create a contract for a customer
         - Assert:
             - status code 201
-            - contract is created
             - contract support is None
+              and will be assigned by management in admin
         """
-        user = User.objects.get(username='user_sales')
-        test_user = self.get_token_auth(user)
-        response = test_user.post(self.contract_url, CONTRACT_DATA, format='json')  # noqa
+        test_user = self.get_token_auth("user_sales")
+        response = test_user.post(self.contract_url, CONTRACT_DATA,
+                                  format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['support_contact_id'], None)
 
@@ -102,9 +116,9 @@ class ContractEndpointTests(CustomTestCase):
         - Assert:
             - status code 403
         """
-        user = User.objects.get(username='user_sales')
-        test_user = self.get_token_auth(user)
-        response = test_user.post(self.contract_url, CONTRACT_DATA, format='json') # noqa
+        test_user = self.get_token_auth("user_sales")
+        response = test_user.post(self.contract_url, PROSPECT_CONTRACT_DATA,
+                                  format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_support_post_contract(self):
@@ -113,9 +127,9 @@ class ContractEndpointTests(CustomTestCase):
         - Assert:
             - status code 403
         """
-        user = User.objects.get(username='user_support')
-        test_user = self.get_token_auth(user)
-        response = test_user.post(self.contract_url, CONTRACT_DATA, format='json')  # noqa
+        test_user = self.get_token_auth("user_support")
+        response = test_user.post(self.contract_url, CONTRACT_DATA,
+                                  format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # GET tests
@@ -126,8 +140,7 @@ class ContractEndpointTests(CustomTestCase):
             - status code 200
             - all contracts are returned
         """
-        user = User.objects.get(username='user_management')
-        test_user = self.get_token_auth(user)
+        test_user = self.get_token_auth("user_management")
         response = test_user.get(self.contract_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Contract.objects.count(), len(response.data))
@@ -140,8 +153,7 @@ class ContractEndpointTests(CustomTestCase):
             - status code 200
             - item in sales contact id is the user
         """
-        user = User.objects.get(username='user_sales')
-        test_user = self.get_token_auth(user)
+        test_user, user = self.get_token_auth_user("user_sales")
         response = test_user.get(self.contract_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for contract in response.data:
@@ -156,13 +168,26 @@ class ContractEndpointTests(CustomTestCase):
             - status code 200
             - item in support contact id is the user
         """
-        user = User.objects.get(username='user_support')
-        test_user = self.get_token_auth(user)
+        test_user, user = self.get_token_auth_user("user_support")
         response = test_user.get(self.contract_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for item in response.data:
             contract = Contract.objects.get(id=item['id'])
-            self.assertIn(contract, Contract.objects.filter(support_contact_id=user.id)) # noqa
+            self.assertIn(contract, Contract.objects.filter(
+                support_contact_id=user.id))
+
+    # OTHER METHODS
+    def test_other_http_methods_contracts(self):
+        """
+        other http methods are not allowed
+        - Assert:
+            - status code 405
+        """
+        test_user = self.get_token_auth('user_management')
+        for method in ['put', 'patch', 'delete']:
+            response = getattr(test_user, method)(self.contract_url)
+            self.assertEqual(response.status_code,
+                             status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class ContractDetailEndpointTest(CustomTestCase):
@@ -171,8 +196,27 @@ class ContractDetailEndpointTest(CustomTestCase):
     where only GET, PUT requests are allowed.
 
     Permissions:
-        - GET: management, sales and support
-        - PUT: management, sales
+    - GET:
+        - 'user_management' can get all contracts
+        - 'user_sales' can get details
+          where customer__sales_contact_id is user.id
+        - 'user_support' can get details
+          where support_contact_id is user.id
+    - PUT:
+        - 'user_management' can update contracts every unsigned contracts
+        - 'user_management can't update signed contracts
+        - 'user_sales' can update contracts where they are the sales_contact_id
+        - 'user_sales can't update signed contracts
+        - 'user_sales' is not authorized to use PUT method.
+    - DELETE:
+        - 'user_management' can delete contracts that are not signed
+        - 'user_management' can't delete signed contracts
+        - 'user_sales' can delete contracts
+          where they are the sales_contat and is not signed
+        - 'user_sales' can't delete signed contracts
+        - 'user_support' is not authorized to user DELETE method.
+    - OTHER METHODS:
+        - are not allowed for everyone
     """
 
     # GET tests
@@ -183,13 +227,12 @@ class ContractDetailEndpointTest(CustomTestCase):
             - status code 200
             - for i item status code is 200
         """
-        user = User.objects.get(username='user_management')
-        test_user = self.get_token_auth(user)
+        test_user = self.get_token_auth("user_management")
         id_list = self.get_id_list(Contract.objects.all())
-        for i in range(len(id_list)):
+        for i in id_list:
             response = test_user.get(reverse('app_crm:contract-detail',
-                                             kwargs={'pk': id_list[i]}))
-            self.assertEqual(response.status_code, 200)
+                                             kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_sales_get_contract(self):
         """
@@ -198,19 +241,25 @@ class ContractDetailEndpointTest(CustomTestCase):
         - Assert:
             - status code 200
             - for i item status code is 200
+            - other items status code is 404
         """
-        user = User.objects.get(username='user_sales')
-        test_user = self.get_token_auth(user)
-        own_customers_ids = self.get_id_list(Customer.objects.filter(sales_contact_id=user.id)) # noqa
-        for i in range(len(own_customers_ids)):
+        test_user, user = self.get_token_auth_user("user_sales")
+
+        # GET OWN CONTRACTS
+        own_contracts = self.get_id_list(
+            Contract.objects.filter(customer__sales_contact_id=user.id))
+        for i in own_contracts:
             response = test_user.get(reverse('app_crm:contract-detail',
-                                             kwargs={'pk': own_customers_ids[i]}))  # noqa
-            self.assertEqual(response.status_code, 200)
-        other_ids = self.get_id_list(Contract.objects.exclude(customer__sales_contact_id=user.id)) # noqa
-        for i in range(len(other_ids)):
+                                             kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # DON'T GET OTHER CONTRACTS
+        other = self.get_id_list(
+            Contract.objects.exclude(id__in=own_contracts))
+        for i in other:
             response = test_user.get(reverse('app_crm:contract-detail',
-                                             kwargs={'pk': other_ids[i]}))
-            self.assertEqual(response.status_code, 403)
+                                             kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_support_get_contract(self):
         """
@@ -221,18 +270,23 @@ class ContractDetailEndpointTest(CustomTestCase):
             - for i item status code is 200
             - other id status code is 404
         """
-        user = User.objects.get(username='user_support')
-        test_user = self.get_token_auth(user)
-        own_contracts_ids = self.get_id_list(Contract.objects.filter(support_contact_id=user.id))  # noqa
-        for i in range(len(own_contracts_ids)):
+        test_user, user = self.get_token_auth_user("user_support")
+
+        # GET OWN CONTRACTS
+        own_contracts = self.get_id_list(
+            Contract.objects.filter(support_contact_id=user.id))
+        for i in own_contracts:
             response = test_user.get(reverse('app_crm:contract-detail',
-                                             kwargs={'pk': own_contracts_ids[i]}))  # noqa
-            self.assertEqual(response.status_code, 200)
-        other_ids = self.get_id_list(Contract.objects.exclude(support_contact_id=user.id))  # noqa
-        for i in range(len(other_ids)):
+                                             kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # DON'T GET OTHER CONTRACTS
+        other = self.get_id_list(
+            Contract.objects.exclude(id__in=own_contracts))
+        for i in other:
             response = test_user.get(reverse('app_crm:contract-detail',
-                                             kwargs={'pk': other_ids[i]}))
-            self.assertEqual(response.status_code, 404)
+                                             kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     # PUT tests
     def test_management_put_contract(self):
@@ -242,62 +296,84 @@ class ContractDetailEndpointTest(CustomTestCase):
             - status code 200
             - for i item status code is 200
         """
-        user = User.objects.get(username='user_management')
-        test_user = self.get_token_auth(user)
+        test_user = self.get_token_auth("user_management")
         id_list = self.get_id_list(Contract.objects.all())
-        for i in range(len(id_list)):
+        for i in id_list:
             response = test_user.put(reverse('app_crm:contract-detail',
-                                             kwargs={'pk': id_list[i]}),
+                                             kwargs={'pk': i}),
                                      UPDATE_CONTRACT_DATA, format='json')
             self.assertEqual(response.status_code, 200)
 
-    def test_sales_put_contract(self):
+    def test_sales_put_contract_unsigned_to_signed(self):
         """
-        sales role can only update contracts
+        sales role can update contracts
         where they are the sales_contact_id
         - Assert:
-            - status code 200
             - for i item status code is 200
         """
-        user = User.objects.get(username='user_sales')
-        test_user = self.get_token_auth(user)
-        own_customers_ids = self.get_id_list(Customer.objects.filter(sales_contact_id=user.id))  # noqa
-        for i in range(len(own_customers_ids)):
+        test_user, user = self.get_token_auth_user("user_sales")
+        unsigned_contracts = self.get_id_list(
+            Contract.objects.filter(customer__sales_contact_id=user.id))
+        for i in unsigned_contracts:
             response = test_user.put(reverse('app_crm:contract-detail',
-                                             kwargs={'pk': own_customers_ids[i]}),  # noqa
+                                             kwargs={'pk': i}),
                                      UPDATE_CONTRACT_DATA, format='json')
             self.assertEqual(response.status_code, 200)
-        other_ids = self.get_id_list(Contract.objects.exclude(customer__sales_contact_id=user.id))  # noqa
-        for i in range(len(other_ids)):
+
+    def test_sales_put_contract_from_signed_to_unsigned(self):
+        """
+        sales role can't update contracts
+        where they are the sales_contact_id and is signed
+        - Assert:
+            - for i item status code is 400
+        """
+        test_user, user = self.get_token_auth_user("user_sales")
+        signed_contracts = self.get_id_list(
+            Contract.objects.filter(customer__sales_contact_id=user.id,
+                                    is_signed=True))
+        for i in signed_contracts:
             response = test_user.put(reverse('app_crm:contract-detail',
-                                             kwargs={'pk': other_ids[i]}),
+                                             kwargs={'pk': i}),  # noqa
+                                     CONTRACT_DATA, format='json')
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_sales_put_contract_where_not_sales_contact(self):
+        """
+        sales role can't update contracts
+        where they are not the sales_contact_id
+        - Assert:
+            - for i item status code is 404
+        """
+        test_user, user = self.get_token_auth_user("user_sales")
+        other_contracts = self.get_id_list(
+            Contract.objects.exclude(customer__sales_contact_id=user.id))
+        for i in other_contracts:
+            response = test_user.put(reverse('app_crm:contract-detail',
+                                             kwargs={'pk': i}),  # noqa
                                      UPDATE_CONTRACT_DATA, format='json')
-            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.status_code, 404)
 
     def test_support_put_contract(self):
         """
         support role can't update contracts
         - Assert:
-            - status code 404
+            - if support_contact_id is user id status code is 403
+            - if support_contact_id is not user id status code is 404
         """
-        user = User.objects.get(username='user_support')
-        test_user = self.get_token_auth(user)
-        id_list = self.get_id_list(Contract.objects.all())
-        for i in range(len(id_list)):
+        test_user, user = self.get_token_auth_user("user_support")
+        own_contracts = self.get_id_list(
+            Contract.objects.filter(support_contact_id=user.id))
+        for i in own_contracts:
             response = test_user.put(reverse('app_crm:contract-detail',
-                                             kwargs={'pk': id_list[i]}),
+                                             kwargs={'pk': i}),
                                      UPDATE_CONTRACT_DATA, format='json')
-            self.assertEqual(response.status_code, 404)
+            self.assertEqual(response.status_code, 403)
 
-    # other methods
-    def test_other_methods(self):
-        """
-        other methods are not allowed on contract details
-        - Assert:
-            - status code 405
-        """
-        user = User.objects.get(username='user_management')
-        test_user = self.get_token_auth(user)
-        response = test_user.delete(reverse('app_crm:contract-detail',
-                                            kwargs={'pk': 1}))
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED) # noqa
+        other_contracts = self.get_id_list(
+            Contract.objects.exclude(support_contact_id=user.id))
+        for i in other_contracts:
+            response = test_user.put(reverse('app_crm:contract-detail',
+                                             kwargs={'pk': i}),
+                                     UPDATE_CONTRACT_DATA, format='json')
+
+            self.assertEqual(response.status_code, 404)

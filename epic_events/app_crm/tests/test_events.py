@@ -1,6 +1,6 @@
 # app_crm/tests/test_contracts.py
 # created 24/03/2022 at 10:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 25/03/2022 at 10:49 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 28/03/2022 at 12:10 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/tests/test_contracts.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.28"
+__version__ = "0.2.0"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -24,17 +24,38 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 
 # local application imports
-from app_users.models import (
-    User,
-)
 from app_crm.models import (
     Event
 )
 from .setup import CustomTestCase
 
 # other imports & constants
-EVENT_DATA = {}
-UNSIGNED_EVENT_DATA = {}
+EVENT_DATA = {
+    'event_name': 'Unfinished Event',
+    'event_date': '2023-03-23T11:38:00.000Z',
+    'attendees': "100",
+    'notes': 'This is a test event',
+    'is_finished': False,
+    'contract_id': 1,
+}
+
+UNSIGNED_EVENT_DATA = {
+    'event_name': 'Unfinished Event',
+    'event_date': '2023-03-23T11:38:00.000Z',
+    'attendees': "100",
+    'notes': 'This is a test event',
+    'is_finished': False,
+    'contract_id': 2,
+}
+
+FINISHED_EVENT_DATA = {
+    'event_name': 'Finished Event',
+    'event_date': '2023-03-23T11:38:00.000Z',
+    'attendees': "100",
+    'notes': 'This is a test event',
+    'is_finished': True,
+    'contract_id': 1,
+}
 
 
 class EventEndpointTests(CustomTestCase):
@@ -43,8 +64,21 @@ class EventEndpointTests(CustomTestCase):
     where only POST and GET requests are allowed.
 
     Permissions:
-        - POST: management, sales, support
-        - GET: management, sales and support
+    - POST:
+        - 'user_management' can create an event for a signed contract
+        - 'user_management' can't create an event for an unsigned contract
+        - 'user_sales' can create an event for a signed contract
+        where he is the sales_contact
+        - 'user_sales' can't create an event for an unsigned contract
+        - 'user_support can create an event for a signed contracts
+        where he is the support_contact
+        - 'user_support' can't create an event for an unsigned contract
+    - GET:
+        - 'user_management' can get all events
+        - 'user_sales' can get events
+          where the contract_id__customer__sales_contact_id is user
+        - 'user_support' can get events
+          where the contract_id__support_contact_id is user
     """
     event_url = reverse('app_crm:event-list')
 
@@ -54,13 +88,10 @@ class EventEndpointTests(CustomTestCase):
         management roles can post new events on signed contracts
         - Assert:
             - status code 201
-            - response data is correct
         """
-        user = User.objects.get(username='user_management')
-        test_user = self.get_token_auth(user)
+        test_user = self.get_token_auth("user_management")
         response = test_user.post(self.event_url, EVENT_DATA, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['contract_id'], EVENT_DATA['contract_id'])  # noqa: E501
 
     def test_management_post_event_with_unsigned_contract(self):
         """
@@ -68,9 +99,9 @@ class EventEndpointTests(CustomTestCase):
         - Assert:
             - status code 403
         """
-        user = User.objects.get(username='user_management')
-        test_user = self.get_token_auth(user)
-        response = test_user.post(self.event_url, UNSIGNED_EVENT_DATA, format='json')  # noqa: E501
+        test_user = self.get_token_auth("user_management")
+        response = test_user.post(self.event_url, UNSIGNED_EVENT_DATA,
+                                  format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_sales_post_event(self):
@@ -80,11 +111,9 @@ class EventEndpointTests(CustomTestCase):
             - status code 201
             - response data is correct
         """
-        user = User.objects.get(username='user_sales')
-        test_user = self.get_token_auth(user)
+        test_user = self.get_token_auth("user_sales")
         response = test_user.post(self.event_url, EVENT_DATA, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['contract_id'], EVENT_DATA['contract_id'])  # noqa: E501
 
     def test_sales_post_event_with_unsigned_contract(self):
         """
@@ -92,9 +121,9 @@ class EventEndpointTests(CustomTestCase):
         - Assert:
             - status code 403
         """
-        user = User.objects.get(username='user_sales')
-        test_user = self.get_token_auth(user)
-        response = test_user.post(self.event_url, UNSIGNED_EVENT_DATA, format='json')  # noqa: E501
+        test_user = self.get_token_auth("user_sales")
+        response = test_user.post(self.event_url, UNSIGNED_EVENT_DATA,
+                                  format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_support_post_event(self):
@@ -102,13 +131,21 @@ class EventEndpointTests(CustomTestCase):
         support role can create a new evetn if the contract is signed
         - Assert:
             - status code 201
-            - response data is correct
         """
-        user = User.objects.get(username='user_support')
-        test_user = self.get_token_auth(user)
+        test_user = self.get_token_auth("user_support")
         response = test_user.post(self.event_url, EVENT_DATA, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['contract_id'], EVENT_DATA['contract_id'])  # noqa: E501
+
+    def test_support_post_event_with_unsigned_contract(self):
+        """
+        support role cannot create a new event if the contract isn't signed
+        - Assert:
+            - status code 403
+        """
+        test_user = self.get_token_auth("user_support")
+        response = test_user.post(self.event_url, UNSIGNED_EVENT_DATA,
+                                  format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # GET tests
     def test_management_get_event(self):
@@ -116,10 +153,9 @@ class EventEndpointTests(CustomTestCase):
         management role can get every events in the db
         - Assert:
             - status code 200
-            - response data is correct
+            - all events are returned
         """
-        user = User.objects.get(username='user_management')
-        test_user = self.get_token_auth(user)
+        test_user = self.get_token_auth("user_management")
         response = test_user.get(self.event_url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Event.objects.count(), len(response.data))
@@ -132,13 +168,12 @@ class EventEndpointTests(CustomTestCase):
             - status code 200
             - response data is correct
         """
-        user = User.objects.get(username='user_sales')
-        test_user = self.get_token_auth(user)
+        test_user, user = self.get_token_auth_user("user_sales")
+        own_events = Event.objects.filter(
+            contract_id__customer__sales_contact_id=user.id)
         response = test_user.get(self.event_url, format='json')
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        for item in response.data:
-            self.assertEqual(Event.objects.get(contract_id=item['contract_id']).contract_id.contract.sales_contact_id, user)  # noqa: E501
+        self.assertEqual(len(response.data), len(own_events))
 
     def test_support_get_event(self):
         """
@@ -148,13 +183,24 @@ class EventEndpointTests(CustomTestCase):
             - status code 200
             - response data is correct
         """
-        user = User.objects.get(username='user_support')
-        test_user = self.get_token_auth(user)
+        test_user, user = self.get_token_auth_user("user_support")
         response = test_user.get(self.event_url, format='json')
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for item in response.data:
-            self.assertEqual(Event.objects.get(contract_id=item['contract_id']).contract_id.support_contact_id, user)  # noqa: E501
+            self.assertEqual(
+                Event.objects.get(
+                    contract_id=item['contract_id']).contract_id.support_contact_id.id, user.id)  # noqa: E501
+
+    def other_http_methods_events(self):
+        """
+        other http methods are not allowed
+        - Assert:
+            - status code 405
+        """
+        test_user = self.get_token_auth("user_management")
+        response = test_user.get(self.event_url, format='json')
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class EventDetailEndpointTest(CustomTestCase):
@@ -163,9 +209,24 @@ class EventDetailEndpointTest(CustomTestCase):
     where only GET, PUT requests are allowed.
 
     Permissions:
-        - GET: management, sales and support
-        - PUT: management, sales
-        - DELETE: management, sales
+    - GET:
+        - 'user_management' can get all events
+        - 'user_sales' can get details on events
+          where contract_id__customer__sales_contact_id is user
+        - 'user_support' can get details on events where
+          contract_id__support_contact_id is user
+    - PUT:
+        - 'user_management' can update unfinished event
+        - 'user_management' can't update finished events
+        - 'user_sales' can update unfinished event
+        - 'user_sales' can't update finished event
+        - 'user_support' can update unfinished event
+        - 'user_support' can't update finished event
+    - DELETE:
+        - 'user_management' can delete unfinished event
+        - 'user_management' can't delete finished event
+        - 'user_sales' can't delete event
+        - 'user_support can't delete event
     """
 
     # GET tests
@@ -176,13 +237,12 @@ class EventDetailEndpointTest(CustomTestCase):
             - status code 200
             - for i item status code 200
         """
-        user = User.objects.get(username='user_management')
-        test_user = self.get_token_auth(user)
+        test_user = self.get_token_auth("user_management")
         id_list = self.get_id_list(Event.objects.all())
-        for id in range(len(id_list)):
+        for i in id_list:
             response = test_user.get(reverse('app_crm:event-detail',
-                                             kwargs={'pk': id_list[id]}))  # noqa
-            self.assertEqual(response.status_code, 200)
+                                             kwargs={'pk': i}))  # noqa
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_sales_get_event_detail(self):
         """
@@ -191,19 +251,27 @@ class EventDetailEndpointTest(CustomTestCase):
         - Assert:
             - status code 200
             - for i item status code 200
+            - other 404
         """
-        user = User.objects.get(username='user_sales')
-        test_user = self.get_token_auth(user)
-        id_list = self.get_id_list(Event.objects.filter(contract_id__contract__sales_contact_id=user.id))  # noqa
-        for id in range(len(id_list)):
+        test_user, user = self.get_token_auth_user("user_sales")
+
+        # GET OWN EVENTS
+        own_event = self.get_id_list(
+            Event.objects.filter(
+                contract_id__customer__sales_contact_id=user.id))
+        for i in own_event:
             response = test_user.get(reverse('app_crm:event-detail',
-                                             kwargs={'pk': id_list[id]}))
-            self.assertEqual(response.status_code, 200)
-        other_id_list = self.get_id_list(Event.objects.exclude(contract_id__contract__sales_contact_id=user.id))  # noqa
-        for id in range(len(other_id_list)):
+                                             kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # DON'T GET OTHER EVENTS
+        other = self.get_id_list(
+            Event.objects.exclude(
+                id__in=own_event))
+        for i in other:
             response = test_user.get(reverse('app_crm:event-detail',
-                                             kwargs={'pk': other_id_list[id]}))
-            self.assertEqual(response.status_code, 403)
+                                             kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_support_get_event_detail(self):
         """
@@ -213,60 +281,83 @@ class EventDetailEndpointTest(CustomTestCase):
             - status code 200
             - for i item status code 200
         """
-        user = User.objects.get(username='user_support')
-        test_user = self.get_token_auth(user)
-        id_list = self.get_id_list(Event.objects.filter(contract_id__support_contact_id=user.id))  # noqa
-        for id in range(len(id_list)):
+        test_user, user = self.get_token_auth_user("user_support")
+
+        # OWN EVENTS
+        own_event = self.get_id_list(
+            Event.objects.filter(
+                contract_id__support_contact_id=user.id))
+        for i in own_event:
             response = test_user.get(reverse('app_crm:event-detail',
-                                             kwargs={'pk': id_list[id]}))
-            self.assertEqual(response.status_code, 200)
-        other_id_list = self.get_id_list(Event.objects.exclude(contract_id__support_contact_id=user.id))  # noqa
-        for id in range(len(other_id_list)):
+                                             kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # DON'T GET OTHER EVENTS
+        other = self.get_id_list(
+            Event.objects.exclude(
+                id__in=own_event))
+        for i in other:
             response = test_user.get(reverse('app_crm:event-detail',
-                                             kwargs={'pk': other_id_list[id]}))
-            self.assertEqual(response.status_code, 403)
+                                             kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     # PUT tests
     def test_management_put_event_detail(self):
         """
-        management can update events
+        management role can only update events
+        where status is not finished
         - Assert:
             - status code 200
-            - response data is correct
         """
-        user = User.objects.get(username='user_management')
-        test_user = self.get_token_auth(user)
-        id_list = self.get_id_list(Event.objects.all())
-        for id in range(len(id_list)):
+        test_user, user = self.get_token_auth_user("user_management")
+        unfinished_event = self.get_id_list(
+            Event.objects.filter(
+                is_finished=False))
+        for i in unfinished_event:
             response = test_user.put(reverse('app_crm:event-detail',
-                                             kwargs={'pk': id_list[id]}),
-                                     EVENT_DATA, format='json')
+                                             kwargs={'pk': i}),
+                                     data=FINISHED_EVENT_DATA,
+                                     format='json')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(response.data['contract_id'], EVENT_DATA['contract_id'])  # noqa: E501
+
+        # DON'T UPDATE FINISHED EVENTS
+        finished_event = self.get_id_list(
+            Event.objects.filter(
+                is_finished=True))
+        for i in finished_event:
+            response = test_user.put(reverse('app_crm:event-detail',
+                                             kwargs={'pk': i}),
+                                     data=EVENT_DATA,
+                                     format='json')
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_sales_put_event_detail(self):
         """
         sales role can only update events
-        where contract_id__contract__sales_contact == user.id
+        where they are assigned as sales_contact
         - Assert:
             - status code 200
-            - response data is correct
         """
-        user = User.objects.get(username='user_sales')
-        test_user = self.get_token_auth(user)
-        id_list = self.get_id_list(Event.objects.filter(contract_id__contract__sales_contact_id=user.id))  # noqa
-        for id in range(len(id_list)):
+        test_user, user = self.get_token_auth_user("user_sales")
+        own_event = self.get_id_list(
+            Event.objects.filter(
+                contract_id__customer__sales_contact_id=user.id))
+        for i in own_event:
             response = test_user.put(reverse('app_crm:event-detail',
-                                             kwargs={'pk': id_list[id]}),
-                                     EVENT_DATA, format='json')
+                                             kwargs={'pk': i}),
+                                     data=FINISHED_EVENT_DATA,
+                                     format='json')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(response.data['contract_id'], EVENT_DATA['contract_id'])  # noqa
-        other_id_list = self.get_id_list(Event.objects.exclude(contract_id__contract__sales_contact_id=user.id))  # noqa
-        for id in range(len(other_id_list)):
+
+        other = self.get_id_list(
+            Event.objects.exclude(
+                id__in=own_event))
+        for i in other:
             response = test_user.put(reverse('app_crm:event-detail',
-                                             kwargs={'pk': other_id_list[id]}),  # noqa
-                                     EVENT_DATA, format='json')
-            self.assertEqual(response.status_code, 403)
+                                             kwargs={'pk': i}),
+                                     data=EVENT_DATA,
+                                     format='json')
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_support_put_event_detail(self):
         """
@@ -276,46 +367,51 @@ class EventDetailEndpointTest(CustomTestCase):
             - status code 200
             - response data is correct
         """
-        user = User.objects.get(username='user_support')
-        test_user = self.get_token_auth(user)
-        id_list = self.get_id_list(Event.objects.filter(contract_id__support_contact_id=user.id))  # noqa
-        for id in range(len(id_list)):
+        test_user, user = self.get_token_auth_user("user_support")
+
+        # PUT OWN UNFINISHED EVENTS
+        own_event = self.get_id_list(
+            Event.objects.filter(
+                contract_id__support_contact_id=user.id,
+                is_finished=False))
+        for id in own_event:
             response = test_user.put(reverse('app_crm:event-detail',
-                                             kwargs={'pk': id_list[id]}),
-                                     EVENT_DATA, format='json')
+                                             kwargs={'pk': id}),
+                                     FINISHED_EVENT_DATA, format='json')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(response.data['contract_id'], EVENT_DATA['contract_id'])  # noqa
-        other_id_list = self.get_id_list(Event.objects.exclude(contract_id__support_contact_id=user.id))  # noqa
-        for id in range(len(other_id_list)):
+
+        # DON'T PUT OTHER EVENTS
+        other = self.get_id_list(
+            Event.objects.exclude(
+                id__in=own_event))
+        for i in other:
             response = test_user.put(reverse('app_crm:event-detail',
-                                             kwargs={'pk': other_id_list[id]}),  # noqa
-                                     EVENT_DATA, format='json')
-            self.assertEqual(response.status_code, 403)
+                                             kwargs={'pk': i}),
+                                     FINISHED_EVENT_DATA, format='json')
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     # DELETE tests
     def test_management_delete_event_detail(self):
         """
-        management can delete event if contract is_signed = False
+        management can delete event if it is not finished
         - Assert:
             - status code 204
         """
-        user = User.objects.get(username='user_management')
-        test_user = self.get_token_auth(user)
-        id_list = self.get_id_list(Event.objects.filter(contract_id__is_signed=False))  # noqa
-        for id in range(len(id_list)):
+        test_user = self.get_token_auth("user_management")
+        id_list = self.get_id_list(Event.objects.filter(is_finished=False))  # noqa
+        for i in id_list:
             response = test_user.delete(reverse('app_crm:event-detail',
-                                                kwargs={'pk': id_list[id]}))
+                                                kwargs={'pk': i}))
             self.assertEqual(response.status_code, 204)
 
-    def test_management_delete_event_where_contract_is_signed(self):
+    def test_management_delete_event_where_event_is_finished(self):
         """
         management role can't delete event if contract is_signed = True
         - Assert:
             - status code 403
         """
-        user = User.objects.get(username='user_management')
-        test_user = self.get_token_auth(user)
-        id_list = self.get_id_list(Event.objects.filter(contract_id__is_signed=True))  # noqa
+        test_user = self.get_token_auth("user_management")
+        id_list = self.get_id_list(Event.objects.filter(is_finished=True))  # noqa
         for id in range(len(id_list)):
             response = test_user.delete(reverse('app_crm:event-detail',
                                                 kwargs={'pk': id_list[id]}))
@@ -323,42 +419,30 @@ class EventDetailEndpointTest(CustomTestCase):
 
     def test_sales_delete_event_detail(self):
         """
-        sales role can delete event if contract is_signed = False
-        - Assert:
-            - status code 204
-        """
-        user = User.objects.get(username='user_sales')
-        test_user = self.get_token_auth(user)
-        id_list = self.get_id_list(Event.objects.filter(contract_id__is_signed=False))  # noqa
-        for id in range(len(id_list)):
-            response = test_user.delete(reverse('app_crm:event-detail',
-                                                kwargs={'pk': id_list[id]}))
-            self.assertEqual(response.status_code, 204)
-
-    def test_sales_delete_event_where_contract_is_signed(self):
-        """
-        sales role can't delete event if contract is_signed = True
-        - Assert:
-            - status code 403
-        """
-        user = User.objects.get(username='user_sales')
-        test_user = self.get_token_auth(user)
-        id_list = self.get_id_list(Event.objects.filter(contract_id__is_signed=True))  # noqa
-        for id in range(len(id_list)):
-            response = test_user.delete(reverse('app_crm:event-detail',
-                                                kwargs={'pk': id_list[id]}))
-            self.assertEqual(response.status_code, 403)
-
-    def test_support_delete_event_detail(self):
-        """
         sales role can't delete events
         - Assert:
             - status code 403
         """
-        user = User.objects.get(username='user_support')
-        test_user = self.get_token_auth(user)
-        id_list = self.get_id_list(Event.objects.all())
+        test_user, user = self.get_token_auth_user("user_sales")
+        id_list = self.get_id_list(
+            Event.objects.filter(
+                contract_id__customer__sales_contact_id=user.id))
         for id in range(len(id_list)):
             response = test_user.delete(reverse('app_crm:event-detail',
                                                 kwargs={'pk': id_list[id]}))
-            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_support_delete_event_detail(self):
+        """
+        support role can't delete events
+        - Assert:
+            - status code 403
+        """
+        test_user, user = self.get_token_auth_user("user_support")
+        id_list = self.get_id_list(
+            Event.objects.filter(
+                contract_id__support_contact_id=user.id))
+        for id in range(len(id_list)):
+            response = test_user.delete(reverse('app_crm:event-detail',
+                                                kwargs={'pk': id_list[id]}))
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
