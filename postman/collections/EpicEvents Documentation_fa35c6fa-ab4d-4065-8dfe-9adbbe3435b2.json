@@ -23,12 +23,12 @@
                             "formdata": [
                                 {
                                     "key": "username",
-                                    "value": "{{username}}",
+                                    "value": "{{user_management}}",
                                     "type": "text"
                                 },
                                 {
                                     "key": "password",
-                                    "value": "{{password}}",
+                                    "value": "{{password_management}}",
                                     "type": "text"
                                 }
                             ]
@@ -64,6 +64,18 @@
                     "item": [
                         {
                             "name": "create a customer",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "id": "247b58a2-f89a-4872-a283-7911807d51bc",
+                                        "exec": [
+                                            ""
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
                             "id": "72232c3e-886f-40ce-a118-8000c448fdd3",
                             "protocolProfileBehavior": {
                                 "disableBodyPruning": true
@@ -76,13 +88,13 @@
                                     "formdata": [
                                         {
                                             "key": "first_name",
-                                            "value": "John",
+                                            "value": "User(Prospect)",
                                             "description": "string - Required",
                                             "type": "text"
                                         },
                                         {
                                             "key": "last_name",
-                                            "value": "Doe",
+                                            "value": "Support(Prospect)",
                                             "description": "string - Required",
                                             "type": "text"
                                         },
@@ -95,26 +107,27 @@
                                         {
                                             "key": "phone_number",
                                             "value": "0100000000",
-                                            "description": "string",
+                                            "description": "string - required",
                                             "type": "text"
                                         },
                                         {
                                             "key": "mobile",
                                             "value": "0600000000",
-                                            "description": "string",
+                                            "description": "string - required",
                                             "type": "text"
                                         },
                                         {
                                             "key": "company_name",
                                             "value": "Apple",
-                                            "description": "string",
+                                            "description": "string - required",
                                             "type": "text"
                                         },
                                         {
                                             "key": "is_customer",
-                                            "value": "False",
+                                            "value": "True",
                                             "description": "boolean(true=customer, false=prospects, default=False)",
-                                            "type": "text"
+                                            "type": "text",
+                                            "disabled": true
                                         }
                                     ]
                                 },
@@ -202,7 +215,7 @@
                                         }
                                     ]
                                 },
-                                "description": "The list of customers can be filtered.\n\n## Permissions\n\n*   The user must be connected with his JWT\n*   The user must be a member of the management, sales, or support role.\n    \n\n## Content\n\nThe result of the filters and/or the search can only be part of the list accessible to the user\n\n## Filters\n\nSearch by: first_name, last_name or email\n\nExample /?search=last_name"
+                                "description": "The list of customers can be filtered.\n\n## Permissions\n\n*   The user must be connected with his JWT\n*   The user must be a member of the management, sales, or support role.\n    \n\n## Content\n\nThe result of the filters and/or the search can only be part of the list accessible to the user\n\n## Filters\n\nSearch by: last_name or email\n\nExample /?search=last_name"
                             },
                             "response": []
                         },
@@ -253,7 +266,7 @@
                                 "header": [],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\r\n    \"first_name\": \"John\",\r\n    \"last_name\": \"Doe\",\r\n    \"email\": \"JohnDoe@gmail.com\",\r\n    \"phone_number\": \"0100000000\",\r\n    \"mobile\": \"0600000000\",\r\n    \"company_name\": \"GitHub\",\r\n    \"is_customer\": true\r\n}",
+                                    "raw": "{\r\n    \"first_name\": \"John\",\r\n    \"last_name\": \"Doe\",\r\n    \"email\": \"email@gmail.com\",\r\n    \"phone_number\": \"0100000000\",\r\n    \"mobile\": \"0600000000\",\r\n    \"company_name\": \"test\"\r\n}\r\n",
                                     "options": {
                                         "raw": {
                                             "language": "json"
@@ -279,7 +292,7 @@
                                     "variable": [
                                         {
                                             "key": "pk",
-                                            "value": "1"
+                                            "value": "7"
                                         }
                                     ]
                                 },
@@ -319,11 +332,11 @@
                                     "variable": [
                                         {
                                             "key": "pk",
-                                            "value": "2"
+                                            "value": "3"
                                         }
                                     ]
                                 },
-                                "description": "A user from the sales team or a manager can delete a lead (is_customer= False).\n\n## Permissions\n\n*   The user must be connected with his JWT\n*   The user must be a member of the sales team or a manager\n*   A converted customer cannot be deleted"
+                                "description": "A user from the sales team or a manager can delete a lead (is_customer= False).\n\n## Permissions\n\n*   The user must be connected with his JWT\n*   The user must be a member of the a management\n*   A converted customer cannot be deleted"
                             },
                             "response": []
                         }
@@ -372,7 +385,7 @@
                                         },
                                         {
                                             "key": "customer",
-                                            "value": "3",
+                                            "value": "2",
                                             "description": "int - Required",
                                             "type": "text"
                                         }
@@ -508,7 +521,7 @@
                                 "header": [],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\r\n    \"amount\": \"50000.50\",\r\n    \"payment_due_date\": \"2042-01-10\",\r\n    \"is_signed\": true,\r\n}",
+                                    "raw": "{\r\n    \"project_name\": \"test\",\r\n    \"amount\": \"50000.50\",\r\n    \"payment_due_date\": \"2042-01-10\",\r\n    \"is_signed\": false,\r\n    \"customer\": 10\r\n}",
                                     "options": {
                                         "raw": {
                                             "language": "json"
@@ -574,7 +587,7 @@
                                         }
                                     ]
                                 },
-                                "description": "A user from the sales team or a manager can delete a lead (is_customer= False).\n\n## Permissions\n\n*   The user must be connected with his JWT\n*   The user must be a member of the sales team or a manager\n*   A converted contract cannot be deleted"
+                                "description": "A user from the sales team or a manager can delete a lead (is_customer= False).\n\n## Permissions\n\n*   The user must be connected with his JWT\n*   The user must be a member of the management roles\n*   A converted contract cannot be deleted"
                             },
                             "response": []
                         }
@@ -592,42 +605,11 @@
                                 "disableBodyPruning": true
                             },
                             "request": {
-                                "method": "POST",
+                                "method": "GET",
                                 "header": [],
                                 "body": {
                                     "mode": "formdata",
-                                    "formdata": [
-                                        {
-                                            "key": "event_name",
-                                            "value": "Event 1",
-                                            "description": "string - Required",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "event_date",
-                                            "value": "2042-07-10",
-                                            "description": "datetime (string) - required",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "attendees",
-                                            "value": "10",
-                                            "description": "int - Required",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "is_finished",
-                                            "value": "False",
-                                            "description": "boolean(finished=True, unfinished=False, default=False)",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "contract_id",
-                                            "value": "1",
-                                            "description": "int - Required",
-                                            "type": "text"
-                                        }
-                                    ]
+                                    "formdata": []
                                 },
                                 "url": {
                                     "raw": "http://127.0.0.1:8000/crm/events/",
@@ -757,7 +739,31 @@
                             },
                             "request": {
                                 "method": "PUT",
-                                "header": []
+                                "header": [],
+                                "url": {
+                                    "raw": "http://127.0.0.1:8000/crm/events/:pk/",
+                                    "protocol": "http",
+                                    "host": [
+                                        "127",
+                                        "0",
+                                        "0",
+                                        "1"
+                                    ],
+                                    "port": "8000",
+                                    "path": [
+                                        "crm",
+                                        "events",
+                                        ":pk",
+                                        ""
+                                    ],
+                                    "variable": [
+                                        {
+                                            "key": "pk",
+                                            "value": "1"
+                                        }
+                                    ]
+                                },
+                                "description": "The user can modify an event.\n\n## Permissions\n\n*   The user must be logged in with his JWT\n*   The user must have the management, sales or support role\n*   A finished event can only be modified via Django admin.\n    \n\n## Fields\n\n**Required**: event_name, event_date, attendees, notes"
                             },
                             "response": []
                         }
@@ -804,7 +810,7 @@
     ],
     "variable": [
         {
-            "id": "39e1ad2a-8b5b-45e4-ae48-883bcfa56433",
+            "id": "5b0d5bfc-b727-46ac-8a92-d798b3900c9c",
             "key": "baseUrl",
             "value": "{{baseUrl}}",
             "type": "string"
