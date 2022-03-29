@@ -24,27 +24,27 @@ For this project, you will need to have Python 3.10 installed on you machine. Ma
 Now you can run the following commands:
 
 1. From repository download files and clone the folder.
-        ```
+        
         $ git clone https://github.com/AatroXissTV/OC_P12_Epic_Events.git Epic_Events
         $ cd Epic_Events
-        ```
+        
 
 2. Create a Python environnment.
-        ```
+
         $ python -m venv venv  # Windows
         $ python3 -m venv venv  # MacOs & Linux
-        ```
+        
 
 3. Activate the virtual environment.
-        ```
+        
         $ source venv/bin/activate  # MacOS or Linux
         $ source env/Scripts/activate  # for Windows
-        ```
+        
 
 4. Install the dependencies
-        ```
+        
         $ pip install -r requirements.txt
-        ```
+        
 
 ### Setup sentry and database
 
@@ -52,9 +52,9 @@ As we said earlier, you will need to have PostgreSQL (14.2) installed on your ma
 Then create the databe using SQL shell (psql): CREATE DATABASE epic_events_db
 
 To be more quicly install this project a script has been made. To launch the script run the following commande:
-        ```
+        
         python env_setup.py`
-        ```
+        
 
 You will be asked the database name, username, password, host and port.
 Please enter the datas you just used.
@@ -65,24 +65,24 @@ A Django secret key will be automatically generated.
 ### Migrate the database
 
 You'll have to then migrate the database running this command:
-        ```
+        
         python manage.py makemigrations
         python manage.py migrate
-        ```
+        
 
 ### Create a super user
 
 The create an admin (supersuser) to access the admin website.
 You can create a superuser running this command line:
-        ```
+        
         python manage.py create superuser
-        ```
+        
 
 ### Launching the server
 
 Finally you can launch the server running this command:
-        ```
+        
         python manage.py runserver
-        ```
+        
 
 ## How to use this projet?
