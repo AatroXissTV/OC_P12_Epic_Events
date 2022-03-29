@@ -13,7 +13,7 @@ This project uses the following technologies
 
 ## Documentation
 
-For more details on how this API works, please refer to its [documentation](https://www.postman.com/aatroxiss/workspace/epic-events/collection/17750814-052df2cc-576c-4dda-bb24-b1c3c2c6199e?action=share&creator=17750814) (Postman), and the CRM entity-relationship diagram.
+For more details on how this API works, please refer to its [documentation](https://documenter.getpostman.com/view/17750814/UVyoXJWn) (Postman), and the CRM entity-relationship diagram.
 
 
 ## Entity relation diagram
@@ -95,7 +95,7 @@ You can access the API endpoints using these tools:
 - Postman
 - curl
 
-Please refer to the [documentation](https://www.postman.com/aatroxiss/workspace/epic-events/collection/17750814-052df2cc-576c-4dda-bb24-b1c3c2c6199e?action=share&creator=17750814) for more details.
+Please refer to the [documentation](https://documenter.getpostman.com/view/17750814/UVyoXJWn) for more details.
 
 The admin website is available at:
 - http://127.0.0.1:8000/admin/
