@@ -1,0 +1,232 @@
+[
+    {
+        "model": "app_users.user",
+        "pk": 5,
+        "fields": {
+            "password": "pbkdf2_sha256$320000$QR91bjM8GNGMp61pdBrfHR$7en0mYEJgyuIrx4TgdRc4pq0Ghp7e9N3yQYk0w7aiTs=",
+            "last_login": null,
+            "is_superuser": false,
+            "username": "extra_user_sales",
+            "first_name": "extra_user",
+            "last_name": "sales",
+            "email": "extra.user.sales@epicevents.com",
+            "is_staff": false,
+            "is_active": true,
+            "date_joined": "2022-03-23T11:38:00.000Z",
+            "role": "sales",
+            "date_created": "2022-03-23T11:38:00.000Z",
+            "date_updated": "2022-03-23T11:38:00.000Z"
+        }
+    },
+    {
+        "model": "app_users.user",
+        "pk": 6,
+        "fields": {
+            "password": "pbkdf2_sha256$320000$QR91bjM8GNGMp61pdBrfHR$7en0mYEJgyuIrx4TgdRc4pq0Ghp7e9N3yQYk0w7aiTs=",
+            "last_login": null,
+            "is_superuser": false,
+            "username": "extra_user_support",
+            "first_name": "extra_user",
+            "last_name": "support",
+            "email": "extra.user.support@epicevents.com",
+            "is_staff": false,
+            "is_active": true,
+            "date_joined": "2022-03-23T11:38:00.000Z",
+            "role": "support",
+            "date_created": "2022-03-23T11:38:00.000Z",
+            "date_updated": "2022-03-23T11:38:00.000Z"
+        }
+    },
+    {
+        "model": "app_crm.customer",
+        "pk": 1,
+        "fields": {
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "john.doe@gmail.com",
+            "phone_number": "0100000000",
+            "mobile": "0600000000",
+            "company_name": "GitHub",
+            "is_customer": true,
+            "date_created": "2022-03-23T11:38:00.000Z",
+            "date_updated": "2022-03-23T11:38:00.000Z",
+            "sales_contact_id": 2
+        }
+    },
+    {
+        "model": "app_crm.customer",
+        "pk": 2,
+        "fields": {
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "email": "jane.doe@gmail.com",
+            "phone_number": "0100000000",
+            "mobile": "0600000000",
+            "company_name": "Ubisoft",
+            "is_customer": true,
+            "date_created": "2022-03-23T11:38:00.000Z",
+            "date_updated": "2022-03-23T11:38:00.000Z",
+            "sales_contact_id": 2
+        }
+    },
+    {
+        "model": "app_crm.customer",
+        "pk": 3,
+        "fields": {
+            "first_name": "Adrien",
+            "last_name": "Nougaret",
+            "email": "adrien.nougaret@gmail.com",
+            "phone_number": "0100000000",
+            "mobile": "0600000000",
+            "company_name": "ZeratoR",
+            "is_customer": false,
+            "date_created": "2022-03-23T11:38:00.000Z",
+            "date_updated": "2022-03-23T11:38:00.000Z",
+            "sales_contact_id": null
+        }
+    },
+    {
+        "model": "app_crm.customer",
+        "pk": 4,
+        "fields": {
+            "first_name": "Giuseppe",
+            "last_name": "Sorano",
+            "email": "gius@giustv.com",
+            "phone_number": "0100000000",
+            "mobile": "0600000000",
+            "company_name": "GiusTv",
+            "is_customer": false,
+            "date_created": "2022-03-23T11:38:00.000Z",
+            "date_updated": "2022-03-23T11:38:00.000Z",
+            "sales_contact_id": null
+        }
+    },
+    {
+        "model": "app_crm.customer",
+        "pk": 5,
+        "fields": {
+            "first_name": "Ysaline",
+            "last_name": "Gerard",
+            "email": "ysaline@kyria.com",
+            "phone_number": "0100000000",
+            "mobile": "0600000000",
+            "company_name": "Kyria",
+            "is_customer": true,
+            "date_created": "2022-03-23T11:38:00.000Z",
+            "date_updated": "2022-03-23T11:38:00.000Z",
+            "sales_contact_id": 5
+        }
+    },
+    {
+        "model": "app_crm.contract",
+        "pk": 1,
+        "fields":{
+            "project_name": "Project 1",
+            "amount": "1000.5",
+            "payment_due_date": "2022-03-23T11:38:00.000Z",
+            "is_signed": true,
+            "date_created": "2022-03-23T11:38:00.000Z",
+            "date_updated": "2022-03-23T11:38:00.000Z",
+            "customer": 1,
+            "support_contact_id": 6
+        }
+    },
+    {
+        "model": "app_crm.contract",
+        "pk": 2,
+        "fields":{
+            "project_name": "Project 2",
+            "amount": "1000.5",
+            "payment_due_date": "2022-03-23T11:38:00.000Z",
+            "is_signed": false,
+            "date_created": "2022-03-23T11:38:00.000Z",
+            "date_updated": "2022-03-23T11:38:00.000Z",
+            "customer": 2,
+            "support_contact_id": null
+        }
+    },
+    {
+        "model": "app_crm.contract",
+        "pk": 3,
+        "fields":{
+            "project_name": "Project 3",
+            "amount": "1000.5",
+            "payment_due_date": "2022-03-23T11:38:00.000Z",
+            "is_signed": true,
+            "date_created": "2022-03-22T11:38:00.000Z",
+            "date_updated": "2022-03-22T11:38:00.000Z",
+            "customer": 2,
+            "support_contact_id": 3
+        }
+    },
+    {
+        "model": "app_crm.contract",
+        "pk": 4,
+        "fields":{
+            "project_name": "Project 4",
+            "amount": "1000.5",
+            "payment_due_date": "2022-03-23T11:38:00.000Z",
+            "is_signed": true,
+            "date_created": "2022-03-22T11:38:00.000Z",
+            "date_updated": "2022-03-22T11:38:00.000Z",
+            "customer": 2,
+            "support_contact_id": 6
+        }
+    },
+    {
+        "model": "app_crm.contract",
+        "pk": 5,
+        "fields":{
+            "project_name": "Project 3",
+            "amount": "1000.5",
+            "payment_due_date": "2022-03-23T11:38:00.000Z",
+            "is_signed": true,
+            "date_created": "2022-03-22T11:38:00.000Z",
+            "date_updated": "2022-03-22T11:38:00.000Z",
+            "customer": 2,
+            "support_contact_id": 6
+        }
+    },
+    {
+        "model": "app_crm.event",
+        "pk": 1,
+        "fields":{
+            "event_name": "upcoming with support",
+            "event_date": "2023-03-23T11:38:00.000Z",
+            "attendees": "100",
+            "notes": "notes",
+            "is_finished": false,
+            "date_created":"2022-03-22T11:38:00.000Z",
+            "date_updated":"2022-03-22T11:38:00.000Z",
+            "contract_id": 1
+        }
+    },
+    {
+        "model": "app_crm.event",
+        "pk": 2,
+        "fields":{
+            "event_name": "upcoming with no support",
+            "event_date": "2023-03-23T11:38:00.000Z",
+            "attendees": "100",
+            "notes": "notes",
+            "is_finished": false,
+            "date_created":"2022-03-22T11:38:00.000Z",
+            "date_updated":"2022-03-22T11:38:00.000Z",
+            "contract_id": 4
+        }
+    },
+    {
+        "model": "app_crm.event",
+        "pk": 3,
+        "fields":{
+            "event_name": "Finished event",
+            "event_date": "2023-03-23T11:38:00.000Z",
+            "attendees": "100",
+            "notes": "notes",
+            "is_finished": true,
+            "date_created":"2022-03-22T11:38:00.000Z",
+            "date_updated":"2022-03-22T11:38:00.000Z",
+            "contract_id": 5
+        }
+    }
+]

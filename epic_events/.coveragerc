@@ -1,0 +1,12 @@
+[run]
+branch = True
+omit =
+    epic_events/asgi.py
+    epic_events/wsgi.py
+    manage.py
+    setup_env.py
+    */__init__.py
+    */migrations/*
+
+[report]
+skip_empty = true

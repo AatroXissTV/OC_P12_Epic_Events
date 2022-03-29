@@ -1,6 +1,6 @@
 # app_crm/views.py
 # created 07/03/2022 at 09:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 24/03/2022 at 10:14 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 29/03/2022 at 10:49 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/views.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.22"
+__version__ = "0.2.1"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -18,9 +18,12 @@ __status__ = "Development"
 # standard library imports
 
 # third party imports
+from django.core.exceptions import (
+    PermissionDenied
+)
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.viewsets import ModelViewSet
-from rest_framework import generics, status
+from rest_framework import status
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -40,8 +43,9 @@ from .serializers import (
 )
 from .permissions import (
     CanCreate,
-    CanEditCustomerOrContract,
     CanUpdateEvent,
+    CandEditCustomer,
+    CanEditContract
 )
 
 # other imports & constants
@@ -50,7 +54,7 @@ from .permissions import (
 class CustomerViewSet(ModelViewSet):
     serializer_class = CustomerSerializer
     permission_classes = [IsAuthenticated, CanCreate,
-                          CanEditCustomerOrContract]
+                          CandEditCustomer]
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ['^last_name', '^email']
     filterset_fields = ['is_customer']
@@ -69,18 +73,22 @@ class CustomerViewSet(ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_update(self, serializer):
+        """
+        Override the default update method to prevent the sales contact from
+        changing the status of a customer to prospect.
+        """
         customer = self.get_object()
-        if customer.is_customer and serializer.validated_data['is_customer']:
-            return Response({"error": "Cannot change customer to prospect"},
-                            status=status.HTTP_403_FORBIDDEN)
+        if customer.is_customer is True:
+            if serializer.validated_data.get('is_customer') is False:
+                raise PermissionDenied('You cannot change customer to prospect')  # noqa
         serializer.save(sales_contact_id=self.request.user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data)
 
 
 class ContractViewSet(ModelViewSet):
     serializer_class = ContractSerializer
     permission_classes = [IsAuthenticated, CanCreate,
-                          CanEditCustomerOrContract]
+                          CanEditContract]
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ['^customer__last_name', '^customer__email'
                      '=date_created', '=amount']
@@ -94,28 +102,37 @@ class ContractViewSet(ModelViewSet):
         return Contract.objects.all()
 
     def perform_create(self, serializer):
+        """
+        Override the default create method to prevent the sales contact or
+        management to create a contract with a prospect.
+        """
+        if serializer.validated_data.get('customer').is_customer is False:
+            raise PermissionDenied('You cannot create a contract with a prospect')  # noqa
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_update(self, serializer):
+        """
+        Override the default update method to prevent the sales contact or
+        management to change the status of a signed contracts.
+        """
         contract = self.get_object()
-        if contract.is_signed is True and serializer.validated_data['is_signed'] is False:  # noqa
-            return Response({"error": "Cannot update signed contract"},
-                            status=status.HTTP_400_BAD_REQUEST)
+        if contract.is_signed is True:
+            if serializer.validated_data.get('is_signed') is False:
+                raise PermissionDenied('You cannot change signed contracts')
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data)
 
     def perform_destroy(self, instance):
         if instance.is_signed is True:
-            return Response({"error": "Cannot delete signed contract"},
-                            status=status.HTTP_400_BAD_REQUEST)
+            raise PermissionDenied("Cannot delete signed contracts")
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class EventViewSet(ModelViewSet):
     serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated, CanCreate, CanUpdateEvent]
+    permission_classes = [IsAuthenticated, CanUpdateEvent]
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ['^customer__last_name', '^customer__email',
                      '=date_created']
@@ -129,17 +146,34 @@ class EventViewSet(ModelViewSet):
         return Event.objects.all()
 
     def perform_create(self, serializer):
-        contract = generics.get_object_or_404(Contract, pk=serializer.contract_id)  # noqa
-        if contract.is_signed is False:
-            return Response({"error": "Contract is not signed"},
-                            status=status.HTTP_400_BAD_REQUEST)
+        """
+        Override the default create method to prevent the sales contact or
+        management to create an event with a prospect.
+        """
+        if serializer.validated_data.get('contract_id').customer.is_customer is False:  # noqa
+            raise PermissionDenied('You cannot create an event with a prospect')  # noqa
+        if serializer.validated_data.get('contract_id').is_signed is False:
+            raise PermissionDenied('You cannot create an event with a contract not signed')  # noqa
+        # you can't create an event for a contract that has already an event
+        if Event.objects.filter(contract_id=serializer.validated_data.get('contract_id')).exists():  # noqa
+            raise PermissionDenied('You cannot create an event for a contract that already has an event')  # noqa
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_update(self, serializer):
+        """
+        Override the default update method to prevent the sales contact or
+        management to change the status of a finished event.
+        """
         event = self.get_object()
         if event.is_finished is True:
-            return Response({"error": "Cannot update finished event"},
-                            status=status.HTTP_400_BAD_REQUEST)
+            if serializer.validated_data.get('is_finished') is False:
+                raise PermissionDenied('You cannot change finished events')
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def perform_destroy(self, instance):
+        if instance.is_finished is True:
+            raise PermissionDenied("Cannot delete finished events")
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.22"
+__version__ = "0.1.25"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -39,14 +39,16 @@ urlpatterns = [
                                         'delete': 'destroy'}),
          name='customer-detail'),
     path('contracts/',
-         views.ContractViewSet.as_view({'get': 'list'}),
+         views.ContractViewSet.as_view({'get': 'list',
+                                        'post': 'create'}),
          name='contract-list'),
     path('contracts/<int:pk>/',
          views.ContractViewSet.as_view({'get': 'retrieve',
                                         'put': 'update'}),
          name='contract-detail'),
     path('events/',
-         views.EventViewSet.as_view({'get': 'list'}),
+         views.EventViewSet.as_view({'get': 'list',
+                                     'post': 'create'}),
          name='event-list'),
     path('events/<int:pk>/',
          views.EventViewSet.as_view({'get': 'retrieve',

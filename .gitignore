@@ -15,3 +15,6 @@ secret.py
 
 # gitignore logs
 errors.log
+
+# pytest cache
+.pytest_cache/

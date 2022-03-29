@@ -1,6 +1,6 @@
 # app_crm/models.py
 # created 02/03/2022 at 12:06 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 22/03/2022 at 18:17 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 28/03/2022 at 12:10 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/models.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.19"
+__version__ = "0.2.0"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -25,7 +25,6 @@ from django.dispatch import receiver
 from django.db.models.signals import (
     pre_save,
 )
-
 
 # local application imports
 from app_users.models import User
@@ -69,7 +68,7 @@ class Customer(models.Model):
 
     # Methods
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.first_name} {self.last_name} (is customer: {self.is_customer})"  # noqa: E501
 
     # Meta
 
@@ -121,7 +120,7 @@ class Contract(models.Model):
 
     # Methods
     def __str__(self):
-        return f"{self.project_name} ({self.is_signed})"
+        return f"{self.project_name} (is signed: {self.is_signed})"
 
     # Meta
 
@@ -156,6 +155,6 @@ class Event(models.Model):
 
     # Methods
     def __str__(self):
-        return f"{self.event_name} ({self.contract_id})"
+        return f"{self.event_name} (is finished: {self.is_finished})"
 
     # Meta

@@ -1,6 +1,6 @@
 # app_crm/permissions.py
 # created 18/03/2022 at 15:05 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 24/03/2022 at 10:14 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 28/03/2022 at 12:10 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/permissions.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.22"
+__version__ = "0.1.25"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -23,10 +23,6 @@ from rest_framework.permissions import BasePermission
 # django imports
 
 # local application imports
-from .models import (
-    Customer,
-    Contract,
-)
 
 # other imports & constants
 
@@ -43,25 +39,49 @@ class CanCreate(BasePermission):
         return True
 
 
-class CanEditCustomerOrContract(BasePermission):
+class CandEditCustomer(BasePermission):
     """
-    Allows only sales contact and management(superuser)
-    to update a customer or contract
-    Only management(superuser) can delete a customer or contract
+    Only sales and management(superuser)
+    can edit a customer object
     """
     def has_object_permission(self, request, view, obj):
-        if request.method in ['PUT', 'PATCH']:
-            if obj == Customer:
-                return (obj.sales_contact_id == request.user
-                        or request.user.role == 'management')
-            if obj == Contract:
-                return (obj.customer.sales_contact_id == request.user
-                        or request.user.role == 'management')
+        if request.method == 'GET':
+            return True
+        if request.method == 'PUT':
+            if request.user.role == 'support':
+                return False
+            if request.user.role == 'sales':
+                if obj.is_customer is False:
+                    return True
+                else:
+                    return (obj.sales_contact_id == request.user.id)
+            return True
 
         if request.method == 'DELETE':
             return request.user.role == 'management'
 
-        return True
+
+class CanEditContract(BasePermission):
+    """
+    Allows only sales contact and management(superuser)
+    to update a contract
+    Only management(superuser) can delete a contract
+    """
+    def has_object_permission(self, request, view, obj):
+        if request.method == 'GET':
+            return True
+        if request.method == 'PUT':
+            if request.user.role == 'support':
+                return False
+            if request.user.role == 'sales':
+                if obj.customer.sales_contact_id == request.user:
+                    return True
+                else:
+                    return False
+            return True
+
+        if request.method == 'DELETE':
+            return request.user.role == 'management'
 
 
 class CanUpdateEvent(BasePermission):
@@ -71,12 +91,17 @@ class CanUpdateEvent(BasePermission):
     Only management(superuser) can delete an event
     """
     def has_object_permission(self, request, view, obj):
-        if request.method in ['PUT', 'PATCH']:
-            return (obj.contract_id.support_contact_id == request.user
-                    or obj.contract_id.customer.sales_contact_id == request.user  # noqa
-                    or request.user.role == 'management')
+        if request.method == 'GET':
+            return True
+        if request.method == 'PUT':
+            if request.user.role == 'support':
+                return obj.contract_id.support_contact_id == request.user
+            if request.user.role == 'sales':
+                return obj.contract_id.customer.sales_contact_id == request.user  # noqa
+            if request.user.role == 'management':
+                return True
+            else:
+                return False
 
         if request.method == 'DELETE':
             return request.user.role == 'management'
-
-        return True
