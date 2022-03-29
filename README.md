@@ -16,6 +16,10 @@ This project uses the following technologies
 For more details on how this API works, please refer to its [documentation](https://www.postman.com/aatroxiss/workspace/epic-events/collection/17750814-052df2cc-576c-4dda-bb24-b1c3c2c6199e?action=share&creator=17750814) (Postman), and the CRM entity-relationship diagram.
 
 
+## Entity relation diagram
+
+![Entity-relationship diagram](/img/ERD_v1.png)
+
 ## How to install this projet?
 
 ### Download and create virtual environment
