@@ -163,6 +163,20 @@
         "model": "app_crm.contract",
         "pk": 4,
         "fields":{
+            "project_name": "Project 4",
+            "amount": "1000.5",
+            "payment_due_date": "2022-03-23T11:38:00.000Z",
+            "is_signed": true,
+            "date_created": "2022-03-22T11:38:00.000Z",
+            "date_updated": "2022-03-22T11:38:00.000Z",
+            "customer": 2,
+            "support_contact_id": 6
+        }
+    },
+    {
+        "model": "app_crm.contract",
+        "pk": 5,
+        "fields":{
             "project_name": "Project 3",
             "amount": "1000.5",
             "payment_due_date": "2022-03-23T11:38:00.000Z",
@@ -198,7 +212,7 @@
             "is_finished": false,
             "date_created":"2022-03-22T11:38:00.000Z",
             "date_updated":"2022-03-22T11:38:00.000Z",
-            "contract_id": 3
+            "contract_id": 4
         }
     },
     {
@@ -212,7 +226,7 @@
             "is_finished": true,
             "date_created":"2022-03-22T11:38:00.000Z",
             "date_updated":"2022-03-22T11:38:00.000Z",
-            "contract_id": 4
+            "contract_id": 5
         }
     }
 ]

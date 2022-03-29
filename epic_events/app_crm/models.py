@@ -68,7 +68,7 @@ class Customer(models.Model):
 
     # Methods
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.first_name} {self.last_name} (is customer: {self.is_customer})"  # noqa: E501
 
     # Meta
 
@@ -120,7 +120,7 @@ class Contract(models.Model):
 
     # Methods
     def __str__(self):
-        return f"{self.project_name} ({self.is_signed})"
+        return f"{self.project_name} (is signed: {self.is_signed})"
 
     # Meta
 
@@ -155,6 +155,6 @@ class Event(models.Model):
 
     # Methods
     def __str__(self):
-        return f"{self.event_name} ({self.contract_id})"
+        return f"{self.event_name} (is finished: {self.is_finished})"
 
     # Meta

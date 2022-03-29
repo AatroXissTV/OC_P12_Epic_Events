@@ -1,6 +1,6 @@
 # app_crm/views.py
 # created 07/03/2022 at 09:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 28/03/2022 at 12:10 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 29/03/2022 at 10:49 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/views.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -154,6 +154,9 @@ class EventViewSet(ModelViewSet):
             raise PermissionDenied('You cannot create an event with a prospect')  # noqa
         if serializer.validated_data.get('contract_id').is_signed is False:
             raise PermissionDenied('You cannot create an event with a contract not signed')  # noqa
+        # you can't create an event for a contract that has already an event
+        if Event.objects.filter(contract_id=serializer.validated_data.get('contract_id')).exists():  # noqa
+            raise PermissionDenied('You cannot create an event for a contract that already has an event')  # noqa
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

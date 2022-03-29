@@ -1,6 +1,6 @@
 # app_crm/tests/test_contracts.py
 # created 24/03/2022 at 10:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 28/03/2022 at 12:10 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 29/03/2022 at 10:49 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/tests/test_contracts.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -36,7 +36,7 @@ EVENT_DATA = {
     'attendees': "100",
     'notes': 'This is a test event',
     'is_finished': False,
-    'contract_id': 1,
+    'contract_id': 3,
 }
 
 UNSIGNED_EVENT_DATA = {
@@ -54,6 +54,14 @@ FINISHED_EVENT_DATA = {
     'attendees': "100",
     'notes': 'This is a test event',
     'is_finished': True,
+    'contract_id': 2,
+}
+EXISTING_EVENT_DATA = {
+    'event_name': 'Existing Event',
+    'event_date': '2023-03-23T11:38:00.000Z',
+    'attendees': "100",
+    'notes': 'This is a test event',
+    'is_finished': False,
     'contract_id': 1,
 }
 
@@ -67,12 +75,18 @@ class EventEndpointTests(CustomTestCase):
     - POST:
         - 'user_management' can create an event for a signed contract
         - 'user_management' can't create an event for an unsigned contract
+        - 'user_management' can't create an event for a contract that already
+          has an event
         - 'user_sales' can create an event for a signed contract
         where he is the sales_contact
         - 'user_sales' can't create an event for an unsigned contract
+        - 'user_sales' can't create an event for a contract that already
+            has an event
         - 'user_support can create an event for a signed contracts
         where he is the support_contact
         - 'user_support' can't create an event for an unsigned contract
+        - 'user_support' can't create an event for a contract that already
+            has an event
     - GET:
         - 'user_management' can get all events
         - 'user_sales' can get events
@@ -104,6 +118,18 @@ class EventEndpointTests(CustomTestCase):
                                   format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_management_post_event_to_a_contract_with_event(self):
+        """
+        management role cannot create a new event if the selected
+        contract already has an existing event.
+        - Assert:
+            - status code 403
+        """
+        test_user = self.get_token_auth("user_management")
+        response = test_user.post(self.event_url, EXISTING_EVENT_DATA,
+                                  format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_sales_post_event(self):
         """
         sales role can create a new event on signed contracts
@@ -126,9 +152,21 @@ class EventEndpointTests(CustomTestCase):
                                   format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_sales_post_event_to_a_contract_with_event(self):
+        """
+        sales role cannot create a new event if the selected
+        contract already has an existing event.
+        - Assert:
+            - status code 403
+        """
+        test_user = self.get_token_auth("user_sales")
+        response = test_user.post(self.event_url, EXISTING_EVENT_DATA,
+                                  format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_support_post_event(self):
         """
-        support role can create a new evetn if the contract is signed
+        sales role can create a new event if the contract is signed
         - Assert:
             - status code 201
         """
@@ -144,6 +182,18 @@ class EventEndpointTests(CustomTestCase):
         """
         test_user = self.get_token_auth("user_support")
         response = test_user.post(self.event_url, UNSIGNED_EVENT_DATA,
+                                  format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_support_post_event_to_a_contract_with_event(self):
+        """
+        support role cannot create a new event if the selected
+        contract already has an existing event.
+        - Assert:
+            - status code 403
+        """
+        test_user = self.get_token_auth("user_management")
+        response = test_user.post(self.event_url, EXISTING_EVENT_DATA,
                                   format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
