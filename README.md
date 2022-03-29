@@ -53,7 +53,7 @@ Then create the databe using SQL shell (psql): CREATE DATABASE epic_events_db
 
 To be more quicly install this project a script has been made. To launch the script run the following commande:
         
-        python env_setup.py`
+        python env_setup.py
         
 
 You will be asked the database name, username, password, host and port.
@@ -86,3 +86,14 @@ Finally you can launch the server running this command:
         
 
 ## How to use this projet?
+
+You can access the API endpoints using these tools:
+- Postman
+- curl
+
+Please refer to the [documentation](https://www.postman.com/aatroxiss/workspace/epic-events/collection/17750814-052df2cc-576c-4dda-bb24-b1c3c2c6199e?action=share&creator=17750814) for more details.
+
+The admin website is available at:
+- http://127.0.0.1:8000/admin/
+
+The logs are available on sentry.io.
