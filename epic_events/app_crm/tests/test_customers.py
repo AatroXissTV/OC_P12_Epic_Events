@@ -1,6 +1,6 @@
 # app_crm/tests/customers.py
 # created 23/03/2022 at 12:08 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 25/03/2022 at 12:41 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 30/03/2022 at 12:50 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/tests/customers.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.2.0"
+__version__ = "0.2.2"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -138,6 +138,15 @@ class CustomersEndpointTests(CustomTestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # GET tests
+    def test_anon_get_contracts(self):
+        """
+        unlogged user cannot retrieve customers.
+        - Assert:
+            - status code 401
+        """
+        response = self.client.get(self.customers_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
     def test_management_get_customers(self):
         """
         management can see every customers in the DB.
