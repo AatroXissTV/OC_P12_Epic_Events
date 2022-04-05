@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.1.18"
+__version__ = "0.2.5"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -120,8 +120,8 @@ class EventAdmin(admin.ModelAdmin):
 
     @staticmethod
     def support_contact_id(obj):
-        if obj.contract_id.support_contact_id.id is not None:
-            return obj.contract_id.support_contact_id.id
+        if obj.contract_id.support_contact_id is not None:
+            return obj.contract_id.support_contact_id
         else:
             return "No support contact"
 
