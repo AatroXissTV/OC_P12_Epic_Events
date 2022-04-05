@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -148,6 +148,8 @@ class EventViewSet(ModelViewSet):
             raise PermissionDenied('You cannot create an event with a contract not signed')  # noqa
         if Event.objects.filter(contract_id=serializer.validated_data.get('contract_id')).exists():  # noqa
             raise PermissionDenied('You cannot create an event for a contract that already has an event')  # noqa
+        if not Contract.objects.filter(id=serializer.validated_data.get('contract_id')).exists():  # noqa
+            raise PermissionDenied("You can't create an event for a contract that does not exist")  # noqa
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
