@@ -198,6 +198,15 @@ class EventEndpointTests(CustomTestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # GET tests
+    def test_anon_get_contracts(self):
+        """
+        unlogged user cannot retrieve customers.
+        - Assert:
+            - status code 401
+        """
+        response = self.client.get(self.event_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
     def test_management_get_event(self):
         """"
         management role can get every events in the db

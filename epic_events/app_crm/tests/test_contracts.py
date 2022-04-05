@@ -1,6 +1,6 @@
 # app_crm/tests/test_contracts.py
 # created 24/03/2022 at 10:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 24/03/2022 at 10:22 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 30/03/2022 at 12:50 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/tests/test_contracts.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.2.0"
+__version__ = "0.2.2"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -133,6 +133,15 @@ class ContractEndpointTests(CustomTestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # GET tests
+    def test_anon_get_contracts(self):
+        """
+        unlogged user cannot retrieve contracts
+        - Assert:
+            - status code 401
+        """
+        response = self.client.get(self.contract_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
     def test_management_get_contracts(self):
         """
         management role can get all contracts
@@ -208,13 +217,6 @@ class ContractDetailEndpointTest(CustomTestCase):
         - 'user_sales' can update contracts where they are the sales_contact_id
         - 'user_sales can't update signed contracts
         - 'user_sales' is not authorized to use PUT method.
-    - DELETE:
-        - 'user_management' can delete contracts that are not signed
-        - 'user_management' can't delete signed contracts
-        - 'user_sales' can delete contracts
-          where they are the sales_contat and is not signed
-        - 'user_sales' can't delete signed contracts
-        - 'user_support' is not authorized to user DELETE method.
     - OTHER METHODS:
         - are not allowed for everyone
     """
@@ -241,7 +243,7 @@ class ContractDetailEndpointTest(CustomTestCase):
         - Assert:
             - status code 200
             - for i item status code is 200
-            - other items status code is 404
+            - other items status code is 403
         """
         test_user, user = self.get_token_auth_user("user_sales")
 
@@ -259,7 +261,7 @@ class ContractDetailEndpointTest(CustomTestCase):
         for i in other:
             response = test_user.get(reverse('app_crm:contract-detail',
                                              kwargs={'pk': i}))
-            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_support_get_contract(self):
         """
@@ -342,7 +344,7 @@ class ContractDetailEndpointTest(CustomTestCase):
         sales role can't update contracts
         where they are not the sales_contact_id
         - Assert:
-            - for i item status code is 404
+            - for i item status code is 403
         """
         test_user, user = self.get_token_auth_user("user_sales")
         other_contracts = self.get_id_list(
@@ -351,7 +353,7 @@ class ContractDetailEndpointTest(CustomTestCase):
             response = test_user.put(reverse('app_crm:contract-detail',
                                              kwargs={'pk': i}),  # noqa
                                      UPDATE_CONTRACT_DATA, format='json')
-            self.assertEqual(response.status_code, 404)
+            self.assertEqual(response.status_code, 403)
 
     def test_support_put_contract(self):
         """

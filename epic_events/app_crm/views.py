@@ -1,6 +1,6 @@
 # app_crm/views.py
 # created 07/03/2022 at 09:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 29/03/2022 at 10:49 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 30/03/2022 at 12:50 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/views.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.2.1"
+__version__ = "0.2.3"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -25,8 +25,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
 from rest_framework.filters import SearchFilter
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+# from rest_framework.permissions import IsAuthenticated
 
 # django imports
 
@@ -42,10 +42,10 @@ from .serializers import (
     EventSerializer
 )
 from .permissions import (
-    CanCreate,
-    CanUpdateEvent,
-    CandEditCustomer,
-    CanEditContract
+    CanAccess,
+    CustomerPermissions,
+    ContractPermissions,
+    EventPermissions
 )
 
 # other imports & constants
@@ -53,8 +53,7 @@ from .permissions import (
 
 class CustomerViewSet(ModelViewSet):
     serializer_class = CustomerSerializer
-    permission_classes = [IsAuthenticated, CanCreate,
-                          CandEditCustomer]
+    permission_classes = [CanAccess, CustomerPermissions]
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ['^last_name', '^email']
     filterset_fields = ['is_customer']
@@ -87,8 +86,7 @@ class CustomerViewSet(ModelViewSet):
 
 class ContractViewSet(ModelViewSet):
     serializer_class = ContractSerializer
-    permission_classes = [IsAuthenticated, CanCreate,
-                          CanEditContract]
+    permission_classes = [CanAccess, ContractPermissions]
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ['^customer__last_name', '^customer__email'
                      '=date_created', '=amount']
@@ -123,16 +121,10 @@ class ContractViewSet(ModelViewSet):
         serializer.save()
         return Response(serializer.data)
 
-    def perform_destroy(self, instance):
-        if instance.is_signed is True:
-            raise PermissionDenied("Cannot delete signed contracts")
-        instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
 
 class EventViewSet(ModelViewSet):
     serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated, CanUpdateEvent]
+    permission_classes = [CanAccess, EventPermissions]
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ['^customer__last_name', '^customer__email',
                      '=date_created']
@@ -154,9 +146,10 @@ class EventViewSet(ModelViewSet):
             raise PermissionDenied('You cannot create an event with a prospect')  # noqa
         if serializer.validated_data.get('contract_id').is_signed is False:
             raise PermissionDenied('You cannot create an event with a contract not signed')  # noqa
-        # you can't create an event for a contract that has already an event
         if Event.objects.filter(contract_id=serializer.validated_data.get('contract_id')).exists():  # noqa
             raise PermissionDenied('You cannot create an event for a contract that already has an event')  # noqa
+        if not Contract.objects.filter(id=serializer.validated_data.get('contract_id')).exists():  # noqa
+            raise PermissionDenied("You can't create an event for a contract that does not exist")  # noqa
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -173,7 +166,5 @@ class EventViewSet(ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def perform_destroy(self, instance):
-        if instance.is_finished is True:
-            raise PermissionDenied("Cannot delete finished events")
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
