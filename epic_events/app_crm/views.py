@@ -1,6 +1,6 @@
 # app_crm/views.py
 # created 07/03/2022 at 09:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 06/04/2022 at 10:32 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 06/04/2022 at 11:42 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/views.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.2.8"
+__version__ = "0.2.9"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -88,7 +88,7 @@ class ContractViewSet(ModelViewSet):
     serializer_class = ContractSerializer
     permission_classes = [IsAuthenticated, IsManagement | ContractPermissions]
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    search_fields = ['^customer__last_name', '^customer__email'
+    search_fields = ['^customer__last_name', '^customer__email',
                      '=date_created', '=amount']
     filterset_fields = ['is_signed']
 
