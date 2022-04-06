@@ -1,6 +1,6 @@
 # app_crm/views.py
 # created 07/03/2022 at 09:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 05/04/2022 at 12:07 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 06/04/2022 at 10:32 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/views.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.2.6"
+__version__ = "0.2.8"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -26,7 +26,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
-# from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 
 # django imports
 
@@ -42,7 +42,7 @@ from .serializers import (
     EventSerializer
 )
 from .permissions import (
-    CanAccess,
+    IsManagement,
     CustomerPermissions,
     ContractPermissions,
     EventPermissions
@@ -53,7 +53,7 @@ from .permissions import (
 
 class CustomerViewSet(ModelViewSet):
     serializer_class = CustomerSerializer
-    permission_classes = [CanAccess, CustomerPermissions]
+    permission_classes = [IsAuthenticated, IsManagement | CustomerPermissions]
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ['^last_name', '^email']
     filterset_fields = ['is_customer']
@@ -86,7 +86,7 @@ class CustomerViewSet(ModelViewSet):
 
 class ContractViewSet(ModelViewSet):
     serializer_class = ContractSerializer
-    permission_classes = [CanAccess, ContractPermissions]
+    permission_classes = [IsAuthenticated, IsManagement | ContractPermissions]
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ['^customer__last_name', '^customer__email'
                      '=date_created', '=amount']
@@ -124,7 +124,7 @@ class ContractViewSet(ModelViewSet):
 
 class EventViewSet(ModelViewSet):
     serializer_class = EventSerializer
-    permission_classes = [CanAccess, EventPermissions]
+    permission_classes = [IsAuthenticated, IsManagement | EventPermissions]
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ['^customer__last_name', '^customer__email',
                      '=date_created']

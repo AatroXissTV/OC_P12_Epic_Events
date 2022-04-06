@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.2.2"
+__version__ = "0.2.8"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -55,46 +55,41 @@ class CustomersEndpointTests(CustomTestCase):
 
     Permissions:
     - POST:
-        - 'user_management' create a prospect(sales_contact_id=None) - 201
-        - 'user_management' create a customer(sales_contact_id=None) - 201
+        - 'user_management' can't create a customer or a prospeect - 403
         - 'user_sales' create a prospect(sales_contact_id=None) - 201
         - 'user_sales' create a customer(sales_contact_id=user.id) - 201
         - 'user_support' is not authorized to use POST method - 403
     - GET:
         - 'user_management' can get all prospects/customers - 200
         - 'user_sales' get prospects + customers(sales_contact_id=user.id)-200
-        - 'use_support' get customers(contract__support_contact_id=user.id)-200
-    - OTHER METHODS:
-        - are not allowed for everyone - 405
+        - 'user_support' get customers(contract__support_contact_id=user.id)200
     """
     customers_url = reverse('app_crm:customers-list')
 
     # POST tests
     def test_management_post_prospect(self):
         """
-        management role can create a new prospect in the DB.
+        management role can't create a prospect.
+        as they must use the admin panel to create prospects.
         - Assert:
-            - status code 201
-            - There is no salesman assigned to it
+            - status code 403
         """
         test_user = self.get_token_auth('user_management')
         response = test_user.post(self.customers_url, PROSPECT_DATA,
                                   format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['sales_contact_id'], None)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_management_post_customer(self):
         """
-        management can create a new customer in the DB.
+        management role can't create customers.
+        as they must use the admin panel to create customers.
         - Assert:
-            - status code 201
-            - There is no salesman assigned to it
+            - status code 403
         """
         test_user = self.get_token_auth('user_management')
         response = test_user.post(self.customers_url, CUSTOMER_DATA,
                                   format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['sales_contact_id'], None)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_sales_post_prospect(self):
         """
@@ -197,13 +192,13 @@ class CustomersEndpointTests(CustomTestCase):
         """
         other http methods are not allowed
         - Assert:
-            - status code 405
+            - status code 403
         """
         test_user = self.get_token_auth('user_management')
         for method in ['put', 'patch', 'delete']:
             response = getattr(test_user, method)(self.customers_url)
             self.assertEqual(response.status_code,
-                             status.HTTP_405_METHOD_NOT_ALLOWED)
+                             status.HTTP_403_FORBIDDEN)
 
 
 class CustomerDetailEndpointTest(CustomTestCase):
@@ -219,19 +214,17 @@ class CustomerDetailEndpointTest(CustomTestCase):
             - 'user_support' can get details for customers
               where contract__support_contact_id == user.id - 200 else 404
         - PUT:
-            - 'user_management' can update customers and prospects - 200
-            - 'user_management can't update customers to prospects - 400
+            - 'user_management' can't update customers and prospects - 403
+            - 'user_management can't update customers to prospects - 403
             - 'user_sales' can update prospects and customers
               where sales_contact_id == user.id - 200
             - 'user_sales' can't update customers to prospects
-              where sales_contact_id == user.id - 400
-            - 'user_support' is not authorized to use this Method - 404
+              where sales_contact_id == user.id - 403
+            - 'user_support' is not authorized to use this Method - 403
         - DELETE:
-            - 'user_management': can delete customers and prospects
-            - 'user_sales' not authorized to use this method
-            - 'user_support' not authorized to use this method
-        - OTHER METHODS:
-            - are not allowed for everyone
+            - 'user_management' can't delete a customer or a prospect - 403
+            - 'user_sales' can delete a prospect - 204
+            - 'user_support can't delete a prospect or a customer - 403
     """
 
     # GET tests
@@ -314,10 +307,10 @@ class CustomerDetailEndpointTest(CustomTestCase):
     # PUT tests
     def test_management_put_prospects_to_customer(self):
         """
-        management can update prospects to customers
+        management can't update prospects to customers
+        as they have to do it in admin panel.
         - Assert:
-            - status code 200
-            - sales_contact_id is None
+            - status code 403
         """
         test_user = self.get_token_auth("user_management")
         prospect = Customer.objects.filter(is_customer=False)
@@ -325,16 +318,12 @@ class CustomerDetailEndpointTest(CustomTestCase):
             response = test_user.put(reverse('app_crm:customer-detail',
                                              kwargs={'pk': prospect[i].id}),
                                      CUSTOMER_DATA, format='json')
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(Customer.objects.get(
-                id=prospect[i].id).sales_contact_id,
-                None)
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_management_put_customer_to_prospect(self):
         """
-        management can't update customers to prospect
-        - Assert:
-            - status code 400
+        management can't update customers to prospects
+        as they have to do it in admin panel.
         """
         test_user = self.get_token_auth("user_management")
         customer_ids = self.get_id_list(
@@ -396,84 +385,77 @@ class CustomerDetailEndpointTest(CustomTestCase):
         """
         support can't update prospects to customers
         - Assert:
-            - status code 404
+            - status code 403
         """
         test_user = self.get_token_auth("user_support")
         prospect_ids = self.get_id_list(
             Customer.objects.filter(is_customer=False))
-        for i in range(len(prospect_ids)):
+        for i in prospect_ids:
             response = test_user.put(reverse('app_crm:customer-detail',
-                                             kwargs={'pk': prospect_ids[i]}),
+                                             kwargs={'pk': i}),
                                      CUSTOMER_DATA, format='json')
-            self.assertEqual(response.status_code, 404)
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # DELETE tests
-    def test_management_delete_prospect(self):
+    def test_management_delete(self):
         """
-        management can delete prospects
+        management role can't delete prospects or customers
         - Assert:
-            - status code 204
+            - status code 403
         """
         test_user = self.get_token_auth("user_management")
         prospect_ids = self.get_id_list(
             Customer.objects.filter(is_customer=False))
-        for i in range(len(prospect_ids)):
-            response = test_user.delete(reverse('app_crm:customer-detail',
-                                                kwargs={'pk': prospect_ids[i]}))  # noqa
-            self.assertEqual(response.status_code, 204)
-
-    def test_management_delete_customer(self):
-        """
-        management can delete customers
-        - Assert:
-            - status code 204
-        """
-        test_user = self.get_token_auth("user_management")
         customer_ids = self.get_id_list(
             Customer.objects.filter(is_customer=True))
-        for i in range(len(customer_ids)):
+        for i in prospect_ids:
             response = test_user.delete(reverse('app_crm:customer-detail',
-                                                kwargs={'pk': customer_ids[i]}))  # noqa
-            self.assertEqual(response.status_code, 204)
-
-    def test_sales_delete_prospect(self):
-        """
-        sales role can't delete prospects
-        - Assert:
-            - status code 403
-        """
-        test_user = self.get_token_auth("user_sales")
-        prospect_ids = self.get_id_list(
-            Customer.objects.filter(is_customer=False))
-        for i in range(len(prospect_ids)):
+                                                kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        for i in customer_ids:
             response = test_user.delete(reverse('app_crm:customer-detail',
-                                                kwargs={'pk': prospect_ids[i]}))  # noqa
-            self.assertEqual(response.status_code, 403)
+                                                kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_sales_delete_customer(self):
+    def test_sales_delete(self):
         """
-        sales can't delete their customers
+        sales role can delete prospects but can't delete customers
         - Assert:
-            - status code 403
+            - status code 204 if is_customer=False
+            - stauts code 403 if is_customer=True and sales_contact_id = user
         """
         test_user, user = self.get_token_auth_user("user_sales")
-        own_customer_ids = self.get_id_list(
-            Customer.objects.filter(sales_contact_id=user.id))
-        for i in range(len(own_customer_ids)):
+        prospect_ids = self.get_id_list(
+            Customer.objects.filter(is_customer=False))
+        customer_ids = self.get_id_list(
+            Customer.objects.filter(
+                is_customer=True,
+                sales_contact_id=user.id))
+        for i in prospect_ids:
             response = test_user.delete(reverse('app_crm:customer-detail',
-                                                kwargs={'pk': own_customer_ids[i]}))  # noqa
-            self.assertEqual(response.status_code, 403)
+                                                kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        for i in customer_ids:
+            response = test_user.delete(reverse('app_crm:customer-detail',
+                                                kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_support_delete_prospect(self):
+    def test_support_delete(self):
         """
-        support can't delete their customers
+        support role can't delete prospects or customers
         - Assert:
             - status code 403
         """
-        test_user, user = self.get_token_auth_user("user_support")
-        own_customers = self.get_id_list(
-            Customer.objects.filter(contract__support_contact_id=user.id))
-        for i in range(len(own_customers)):
+        test_user = self.get_token_auth("user_support")
+        prospect_ids = self.get_id_list(
+            Customer.objects.filter(is_customer=False))
+        customer_ids = self.get_id_list(
+            Customer.objects.filter(is_customer=True))
+        for i in prospect_ids:
             response = test_user.delete(reverse('app_crm:customer-detail',
-                                                kwargs={'pk': own_customers[i]}))  # noqa
-            self.assertEqual(response.status_code, 403)
+                                                kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        for i in customer_ids:
+            response = test_user.delete(reverse('app_crm:customer-detail',
+                                                kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

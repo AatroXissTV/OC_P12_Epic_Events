@@ -1,6 +1,6 @@
 # app_crm/models.py
 # created 02/03/2022 at 12:06 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 28/03/2022 at 12:10 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 06/04/2022 at 10:32 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/models.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.2.0"
+__version__ = "0.2.8"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -155,6 +155,6 @@ class Event(models.Model):
 
     # Methods
     def __str__(self):
-        return f"{self.event_name} (is finished: {self.is_finished})"
+        return f"{self.event_name} (status: {self.is_finished})"
 
     # Meta

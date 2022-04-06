@@ -1,6 +1,6 @@
 # app_crm/tests/test_models.py
 # created 28/03/2022 at 17:50 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 28/03/2022 at 17:50 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 06/04/2022 at 10:48 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/tests/test_models.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.2.1"
+__version__ = "0.2.8"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -49,6 +49,6 @@ class TestModels(CustomTestCase):
 
     def test_str_event(self):
         event = Event.objects.get(pk=1)
-        self.assertEqual(str(event), 'upcoming with support (is finished: False)')  # noqa
+        self.assertEqual(str(event), 'upcoming with support (status: False)')  # noqa
         event = Event.objects.get(pk=2)
-        self.assertEqual(str(event), 'upcoming with no support (is finished: False)')  # noqa
+        self.assertEqual(str(event), 'upcoming with no support (status: False)')  # noqa

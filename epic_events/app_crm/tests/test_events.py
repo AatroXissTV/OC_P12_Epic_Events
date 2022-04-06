@@ -1,6 +1,6 @@
 # app_crm/tests/test_contracts.py
 # created 24/03/2022 at 10:22 by Antoine 'AatroXiss' BEAUDESSON
-# last modified 29/03/2022 at 10:49 by Antoine 'AatroXiss' BEAUDESSON
+# last modified 06/04/2022 at 10:33 by Antoine 'AatroXiss' BEAUDESSON
 
 """ app_crm/tests/test_contracts.py:
     - *
@@ -10,7 +10,7 @@ __author__ = "Antoine 'AatroXiss' BEAUDESSON"
 __copyright__ = "Copyright 2021, Antoine 'AatroXiss' BEAUDESSON"
 __credits__ = ["Antoine 'AatroXiss' BEAUDESSON"]
 __license__ = ""
-__version__ = "0.2.1"
+__version__ = "0.2.8"
 __maintainer__ = "Antoine 'AatroXiss' BEAUDESSON"
 __email__ = "antoine.beaudesson@gmail.com"
 __status__ = "Development"
@@ -73,7 +73,7 @@ class EventEndpointTests(CustomTestCase):
 
     Permissions:
     - POST:
-        - 'user_management' can create an event for a signed contract
+        - 'user_management' can't create an event for a signed contract
         - 'user_management' can't create an event for an unsigned contract
         - 'user_management' can't create an event for a contract that already
           has an event
@@ -82,7 +82,7 @@ class EventEndpointTests(CustomTestCase):
         - 'user_sales' can't create an event for an unsigned contract
         - 'user_sales' can't create an event for a contract that already
             has an event
-        - 'user_support can create an event for a signed contracts
+        - 'user_support can't create an event for a signed contracts
         where he is the support_contact
         - 'user_support' can't create an event for an unsigned contract
         - 'user_support' can't create an event for a contract that already
@@ -99,13 +99,13 @@ class EventEndpointTests(CustomTestCase):
     # POST tests
     def test_management_post_event(self):
         """
-        management roles can post new events on signed contracts
+        management roles can't post new events on signed contracts
         - Assert:
-            - status code 201
+            - status code 403
         """
         test_user = self.get_token_auth("user_management")
         response = test_user.post(self.event_url, EVENT_DATA, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_management_post_event_with_unsigned_contract(self):
         """
@@ -166,13 +166,13 @@ class EventEndpointTests(CustomTestCase):
 
     def test_support_post_event(self):
         """
-        sales role can create a new event if the contract is signed
+        sales role can't create a new event if the contract is signed
         - Assert:
-            - status code 201
+            - status code 403
         """
         test_user = self.get_token_auth("user_support")
         response = test_user.post(self.event_url, EVENT_DATA, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_support_post_event_with_unsigned_contract(self):
         """
@@ -254,12 +254,12 @@ class EventEndpointTests(CustomTestCase):
         """
         other http methods are not allowed
         - Assert:
-            - status code 405
+            - status code 403
         """
         test_user = self.get_token_auth("user_management")
         response = test_user.get(self.event_url, format='json')
         self.assertEqual(response.status_code,
-                         status.HTTP_405_METHOD_NOT_ALLOWED)
+                         status.HTTP_403_FORBIDDEN)
 
 
 class EventDetailEndpointTest(CustomTestCase):
@@ -282,10 +282,10 @@ class EventDetailEndpointTest(CustomTestCase):
         - 'user_support' can update unfinished event
         - 'user_support' can't update finished event
     - DELETE:
-        - 'user_management' can delete unfinished event
-        - 'user_management' can't delete finished event
-        - 'user_sales' can't delete event
-        - 'user_support can't delete event
+        - 'user_management' can't delete events
+        - 'user_sales can delete unfinished events
+        - 'user_sales can't delete finished events
+        - 'user_support can't delete unfinished events
     """
 
     # GET tests
@@ -363,10 +363,10 @@ class EventDetailEndpointTest(CustomTestCase):
     # PUT tests
     def test_management_put_event_detail(self):
         """
-        management role can only update events
+        management role can't update events
         where status is not finished
         - Assert:
-            - status code 200
+            - status code 403
         """
         test_user, user = self.get_token_auth_user("user_management")
         unfinished_event = self.get_id_list(
@@ -377,7 +377,7 @@ class EventDetailEndpointTest(CustomTestCase):
                                              kwargs={'pk': i}),
                                      data=FINISHED_EVENT_DATA,
                                      format='json')
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
         # DON'T UPDATE FINISHED EVENTS
         finished_event = self.get_id_list(
@@ -392,26 +392,29 @@ class EventDetailEndpointTest(CustomTestCase):
 
     def test_sales_put_event_detail(self):
         """
-        sales role can only update events
-        where they are assigned as sales_contact
-        - Assert:
-            - status code 200
+        sales role can update events of their own customers
+        if is_finished is False
+
+        Assert:
+            - status code 200 for own events (is_finished=False)
+            - status code 403 for other events (is_finished=True)
         """
         test_user, user = self.get_token_auth_user("user_sales")
-        own_event = self.get_id_list(
+        own_unfinished_events = self.get_id_list(
             Event.objects.filter(
+                is_finished=False,
                 contract_id__customer__sales_contact_id=user.id))
-        for i in own_event:
+        for i in own_unfinished_events:
             response = test_user.put(reverse('app_crm:event-detail',
                                              kwargs={'pk': i}),
                                      data=FINISHED_EVENT_DATA,
                                      format='json')
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        other = self.get_id_list(
-            Event.objects.exclude(
-                id__in=own_event))
-        for i in other:
+        # DON'T UPDATE OTHER EVENTS
+        other_events = self.get_id_list(
+            Event.objects.exclude(id__in=own_unfinished_events))
+        for i in other_events:
             response = test_user.put(reverse('app_crm:event-detail',
                                              kwargs={'pk': i}),
                                      data=EVENT_DATA,
@@ -450,58 +453,67 @@ class EventDetailEndpointTest(CustomTestCase):
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     # DELETE tests
-    def test_management_delete_event_detail(self):
+    def test_management_delete_events(self):
         """
-        management can delete event if it is not finished
+        management can't delete events
         - Assert:
-            - status code 204
+            - status code 403
         """
         test_user = self.get_token_auth("user_management")
-        id_list = self.get_id_list(Event.objects.filter(is_finished=False))  # noqa
-        for i in id_list:
+        prospect_ids = self.get_id_list(
+            Event.objects.filter(is_finished=False))
+        customer_ids = self.get_id_list(
+            Event.objects.filter(is_finished=True))
+        for i in prospect_ids:
             response = test_user.delete(reverse('app_crm:event-detail',
                                                 kwargs={'pk': i}))
-            self.assertEqual(response.status_code, 204)
-
-    def test_management_delete_event_where_event_is_finished(self):
-        """
-        management role can't delete event if contract is_signed = True
-        - Assert:
-            - status code 403
-        """
-        test_user = self.get_token_auth("user_management")
-        id_list = self.get_id_list(Event.objects.filter(is_finished=True))  # noqa
-        for id in range(len(id_list)):
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        for i in customer_ids:
             response = test_user.delete(reverse('app_crm:event-detail',
-                                                kwargs={'pk': id_list[id]}))
-            self.assertEqual(response.status_code, 403)
-
-    def test_sales_delete_event_detail(self):
-        """
-        sales role can't delete events
-        - Assert:
-            - status code 403
-        """
-        test_user, user = self.get_token_auth_user("user_sales")
-        id_list = self.get_id_list(
-            Event.objects.filter(
-                contract_id__customer__sales_contact_id=user.id))
-        for id in range(len(id_list)):
-            response = test_user.delete(reverse('app_crm:event-detail',
-                                                kwargs={'pk': id_list[id]}))
+                                                kwargs={'pk': i}))
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_support_delete_event_detail(self):
+    def test_sales_delete_events(self):
+        """
+        sales role can delete unfinished events
+        but can't delete finished events
+        - Assert:
+            - status code 204 if is_finished=False and sales_contact is user
+            - stauts code 403 if is_finished=True
+        """
+        test_user, user = self.get_token_auth_user("user_sales")
+        unfinished_events = self.get_id_list(
+            Event.objects.filter(
+                is_finished=False,
+                contract_id__customer__sales_contact_id=user.id))
+        finished_events = self.get_id_list(
+            Event.objects.filter(
+                is_finished=True))
+        for i in unfinished_events:
+            response = test_user.delete(reverse('app_crm:event-detail',
+                                                kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        for i in finished_events:
+            response = test_user.delete(reverse('app_crm:event-detail',
+                                                kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_support_delete(self):
         """
         support role can't delete events
         - Assert:
             - status code 403
         """
-        test_user, user = self.get_token_auth_user("user_support")
-        id_list = self.get_id_list(
-            Event.objects.filter(
-                contract_id__support_contact_id=user.id))
-        for id in range(len(id_list)):
+        test_user = self.get_token_auth("user_support")
+        unfinished_events = self.get_id_list(
+            Event.objects.filter(is_finished=False))
+        finished_events = self.get_id_list(
+            Event.objects.filter(is_finished=True))
+        for i in unfinished_events:
             response = test_user.delete(reverse('app_crm:event-detail',
-                                                kwargs={'pk': id_list[id]}))
+                                                kwargs={'pk': i}))
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        for i in finished_events:
+            response = test_user.delete(reverse('app_crm:event-detail',
+                                                kwargs={'pk': i}))
             self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
